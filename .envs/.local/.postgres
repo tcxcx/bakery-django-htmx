@@ -1,0 +1,7 @@
+# PostgreSQL
+# ------------------------------------------------------------------------------
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_DB=bakery_app
+POSTGRES_USER=iaYwZIWZLCPwbZPbcMDtWRqyNYpxmWsu
+POSTGRES_PASSWORD=ij5m5UT8FQUBmBA5d2HenbT9Scliwna9zAC6Vftf2Nc2a8x86VY0QuMPuISofEzu
