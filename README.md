@@ -1,70 +1,78 @@
-# Bakery App
+# The Bakery App
 
-App for recipe management
+An app to manage bakery recipes and supplies.
 
-[![Built with Cookiecutter Django](https://img.shields.io/badge/built%20with-Cookiecutter%20Django-ff69b4.svg?logo=cookiecutter)](https://github.com/cookiecutter/cookiecutter-django/)
-[![Black code style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
+## Start Local Environment
 
-## Settings
+Quick guide to start the local environment for project development.
 
-Moved to [settings](http://cookiecutter-django.readthedocs.io/en/latest/settings.html).
+### Prerequisites
 
-## Basic Commands
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+- [Pre-commit](https://pre-commit.com/#installation)
 
-### Setting Up Your Users
+### Build the Stack
 
-- To create a **normal user account**, just go to Sign Up and fill out the form. Once you submit it, you'll see a "Verify Your E-mail Address" page. Go to your console to see a simulated email verification message. Copy the link into your browser. Now the user's email should be verified and ready to go.
+Build the local development stack using Docker Compose:
 
-- To create a **superuser account**, use this command:
+    docker compose -f local.yml build
 
-      $ python manage.py createsuperuser
+### Install Pre-commit
 
-For convenience, you can keep your normal user logged in on Chrome and your superuser logged in on Firefox (or similar), so that you can see how the site behaves for both kinds of users.
+**Important**: Before doing any git commit, ensure [pre-commit](https://pre-commit.com/#installation) is installed globally and then:
 
-### Type checks
+    git init
+    pre-commit install
 
-Running type checks with mypy:
+This step helps in avoiding CI and Linter errors during commits.
 
-    $ mypy bakery_app
+### Run the stack
 
-### Test coverage
+Open a terminal at the project root and run the following for local development:
 
-To run the tests, check your test coverage, and generate an HTML coverage report:
+    docker compose -f local.yml up
 
-    $ coverage run -m pytest
-    $ coverage html
-    $ open htmlcov/index.html
+Or set the environment variable COMPOSE_FILE:
 
-#### Running tests with pytest
+    export COMPOSE_FILE=local.yml
 
-    $ pytest
+And then run:
 
-### Live reloading and Sass CSS compilation
+    docker compose up
 
-Moved to [Live reloading and SASS compilation](https://cookiecutter-django.readthedocs.io/en/latest/developing-locally.html#sass-compilation-live-reloading).
+To run in a detached (background) mode:
 
-### Email Server
+    docker compose up -d
 
-In development, it is often nice to be able to see emails that are being sent from your application. For that reason local SMTP server [Mailpit](https://github.com/axllent/mailpit) with a web interface is available as docker container.
+To stop the stack:
 
-Container mailpit will start automatically when you will run all docker containers.
-Please check [cookiecutter-django Docker documentation](http://cookiecutter-django.readthedocs.io/en/latest/deployment-with-docker.html) for more details how to start all containers.
+    docker compose down
 
-With Mailpit running, to view messages that are sent by your application, open your browser and go to `http://127.0.0.1:8025`
+This should start the following services:
 
-## Deployment
+| Service  | Description                                         | Access                                             |
+| -------- | --------------------------------------------------- | -------------------------------------------------- |
+| django   | Main application server                             | <http://localhost:8000>                            |
+| node     | Node server for SASS, npm packages, and live server | <http://localhost:3000>                            |
+| postgres | Database                                            | Port 6543 (Avoids conflicts with local PostgreSQL) |
+| docs     | Sphinx documentation server                         | <http://localhost:9000>                            |
+| mailpit  | Local SMTP server to test and view emails           | <http://localhost:8025>                            |
 
-The following details how to deploy this application.
+## Documentation
 
-### Docker
+Detailed documentation regarding:
 
-See detailed [cookiecutter-django Docker documentation](http://cookiecutter-django.readthedocs.io/en/latest/deployment-with-docker.html).
+- Local development
+- Deploy to production
+- Code documentation
 
-### Custom Bootstrap Compilation
+Is available in the `docs` docker ( <http://localhost:9000> )
 
-The generated CSS is set up with automatic Bootstrap recompilation with variables of your choice.
-Bootstrap v5 is installed using npm and customised by tweaking your variables in `static/sass/custom_bootstrap_vars`.
+The access it, first start the stack with:
 
-You can find a list of available variables [in the bootstrap source](https://github.com/twbs/bootstrap/blob/v5.1.3/scss/_variables.scss), or get explanations on them in the [Bootstrap docs](https://getbootstrap.com/docs/5.1/customize/sass/).
+    docker compose -f local.yml up -d
 
-Bootstrap's javascript as well as its dependencies are concatenated into a single file: `static/js/vendors.js`.
+Or, just to start the docs service:
+
+    docker compose -f local.yml up docs -d

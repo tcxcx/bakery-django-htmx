@@ -39,6 +39,7 @@ function pathsConfig(appName) {
     fonts: `${this.app}/static/fonts`,
     images: `${this.app}/static/images`,
     js: `${this.app}/static/js`,
+    generalJs: [`${this.app}/static/js/general/*.js`],
   };
 }
 
@@ -74,19 +75,20 @@ function styles() {
     .pipe(dest(paths.css));
 }
 
-// Javascript minification
-function scripts() {
-  return src(`${paths.js}/project.js`)
-    .pipe(plumber()) // Checks for errors
-    .pipe(uglify()) // Minifies the js
-    .pipe(rename({ suffix: '.min' }))
-    .pipe(dest(paths.js));
-}
-
 // Vendor Javascript minification
 function vendorScripts() {
   return src(paths.vendorsJs, { sourcemaps: true })
     .pipe(concat('vendors.js'))
+    .pipe(dest(paths.js))
+    .pipe(plumber()) // Checks for errors
+    .pipe(uglify()) // Minifies the js
+    .pipe(rename({ suffix: '.min' }))
+    .pipe(dest(paths.js, { sourcemaps: '.' }));
+}
+
+function generalScripts() {
+  return src(paths.generalJs, { sourcemaps: true })
+    .pipe(concat('general.js'))
     .pipe(dest(paths.js))
     .pipe(plumber()) // Checks for errors
     .pipe(uglify()) // Minifies the js
@@ -135,14 +137,19 @@ function initBrowserSync() {
 function watchPaths() {
   watch(`${paths.sass}/*.scss`, styles);
   watch(`${paths.templates}/**/*.html`).on('change', reload);
-  watch([`${paths.js}/*.js`, `!${paths.js}/*.min.js`], scripts).on(
-    'change',
-    reload,
-  );
+  watch(
+    [`${paths.js}/general/*.js`, `!${paths.js}/*.min.js`],
+    generalScripts,
+  ).on('change', reload);
 }
 
 // Generate all assets
-const generateAssets = parallel(styles, scripts, vendorScripts, imgCompression);
+const generateAssets = parallel(
+  styles,
+  generalScripts,
+  vendorScripts,
+  imgCompression,
+);
 
 // Set up dev environment
 const dev = parallel(initBrowserSync, watchPaths);

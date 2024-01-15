@@ -10,7 +10,7 @@ Welcome to Bakery App's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   howto
+   local-development
    users
 
 

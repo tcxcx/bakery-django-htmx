@@ -34,6 +34,8 @@ services:
       - bakery_app_local_postgres_data_backups:/backups
     env_file:
       - ./.envs/.local/.postgres
+    ports:
+      - '6543:5432'
 
   docs:
     image: bakery_app_local_docs

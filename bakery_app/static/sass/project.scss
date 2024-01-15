@@ -1,36 +1,8 @@
-@import 'custom_bootstrap_vars';
-@import '~bootstrap/scss/bootstrap';
+// Custom.scss
+// Option A: Include all of Bootstrap
 
-// project specific CSS goes here
+// Include any default variable overrides here (though functions won't be available)
 
-///////////////
-// Variables //
-///////////////
+@import 'node_modules/bootstrap/scss/bootstrap';
 
-// Alert colors
-
-$white: #fff;
-$mint-green: #d6e9c6;
-$black: #000;
-$pink: #f2dede;
-$dark-pink: #eed3d7;
-$red: #b94a48;
-
-////////////
-// Alerts //
-////////////
-
-// bootstrap alert CSS, translated to the django-standard levels of
-// debug, info, success, warning, error
-
-.alert-debug {
-  background-color: $white;
-  border-color: $mint-green;
-  color: $black;
-}
-
-.alert-error {
-  background-color: $pink;
-  border-color: $dark-pink;
-  color: $red;
-}
+// Then add additional custom code here
