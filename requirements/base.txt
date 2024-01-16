@@ -21,3 +21,4 @@ django-tables2==2.7.0 # https://github.com/jieter/django-tables2
 django-filter==23.5 # https://github.com/carltongibson/django-filter
 django-htmx==1.17.2 # https://github.com/adamchainz/django-htmx
 django-author==1.2.0 # https://github.com/lambdalisue/django-author
+django-bootstrap-datepicker-plus==5.0.4 # https://github.com/monim67/django-bootstrap-datepicker-plus
