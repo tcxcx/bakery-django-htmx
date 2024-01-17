@@ -1,6 +1,6 @@
 # The Bakery App
 
-An app to manage bakery recipes and supplies.
+An internal application for a bakery to manage recipes and calculate the cost of production of each product. This app is designed for internal use, and user accounts are managed directly by the system administrator.
 
 ## Start Local Environment
 
@@ -76,3 +76,37 @@ The access it, first start the stack with:
 Or, just to start the docs service:
 
     docker compose -f local.yml up docs -d
+
+## System Structure
+
+### Administration
+
+Manage information of Suppliers, Supplies, and Products.
+Store Supplier details: name, RUC, email, phone, address.
+Each Supplier can provide multiple Supplies, but a Supply is provided by only one Supplier.
+Store Supply details: name, price per gram (including liquids).
+Manage Products with details: name, type, sale price, shape, dimensions.
+Product types managed separately. Shapes: Circular or Rectangular.
+Dimensions: Diameter and height for Circular; length, width, height for Rectangular. Always in cm.
+
+### Profit Margin
+
+Dashboard displaying a table with Product, Shape, Dimensions, Total Cost, Sale Price, Margin (%).
+Margin formula: (sale_price - total_cost) / sale_price * 100
+
+### General Considerations
+
+All tables should have relevant filters.
+For auditing, all models should store: created_by, created_at, updated_by, updated_at.
+
+### Technology Considerations
+
+Packages pre-installed: django-tables2, django-filter, django-htmx, django-author, django-bootstrap-datepicker-plus, htmx (with Gulp).
+UI made dynamic using htmx.
+Use htmx for table filtering and pagination without full page reloads.
+Implement modals with htmx for creating or editing models.
+Implement tables with django-tables2 and filters with django-filter.
+Audit fields with django-author.
+Form creation with django-crispy-forms.
+For datetime fields, use django-bootstrap-datepicker-plus (if Bonus 2 selected).
+Testing with pytest, aiming for at least 90% coverage
