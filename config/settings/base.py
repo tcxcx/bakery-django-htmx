@@ -80,6 +80,8 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     "bakery_app.users",
     # Your stuff: custom apps go here
+    "bakery_app.management",
+
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
