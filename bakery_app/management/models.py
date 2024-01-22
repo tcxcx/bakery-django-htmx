@@ -36,7 +36,7 @@ class Product(models.Model):
     product_type = models.ForeignKey(ProductType, on_delete=models.CASCADE)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2)
     shape = models.CharField(max_length=1, choices=SHAPE_CHOICES)
-    dimensions = models.JSONField()  # Stores dimensions as JSON, e.g., {"diameter": 30, "height": 10}
+    dimensions = models.JSONField()
 
     def __str__(self):
         return self.name
