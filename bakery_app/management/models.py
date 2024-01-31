@@ -1,14 +1,14 @@
 from django.db import models
-
+import uuid
 # Create your models here.
-from django.db import models
-
 class Supplier(models.Model):
     name = models.CharField(max_length=255)
     ruc = models.CharField(max_length=13)
     email = models.EmailField()
     phone = models.CharField(max_length=20)
     address = models.TextField()
+    created = models.DateTimeField(auto_now_add=True)
+    id = models.CharField(max_length=100, default=uuid.uuid4, unique=True, primary_key=True, editable=False)
 
     def __str__(self):
         return self.name

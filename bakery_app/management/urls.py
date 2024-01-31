@@ -1,6 +1,8 @@
 from django.urls import path
 from .views import list_suppliers, supplier_form, delete_supplier
 
+app_name="management"
+
 urlpatterns = [
     path('suppliers/', list_suppliers, name='list_suppliers'),
     path('suppliers/new/', supplier_form, name='new_supplier'),

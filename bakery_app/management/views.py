@@ -4,7 +4,7 @@ from .forms import SupplierForm
 
 def list_suppliers(request):
     suppliers = Supplier.objects.all()
-    return render(request, 'suppliers/list.html', {'suppliers': suppliers})
+    return render(request, 'management/suppliers/list.html', {'suppliers': suppliers})
 
 def supplier_form(request, pk=None):
     if pk:
@@ -20,7 +20,7 @@ def supplier_form(request, pk=None):
     else:
         form = SupplierForm(instance=supplier)
 
-    return render(request, 'suppliers/form.html', {'form': form})
+    return render(request, 'management/suppliers/form.html', {'form': form})
 
 def delete_supplier(request, pk):
     supplier = get_object_or_404(Supplier, pk=pk)
