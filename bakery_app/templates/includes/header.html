@@ -45,7 +45,7 @@
     >
       {% if user.is_authenticated %}
       <li><a href="/">Home</a></li>
-      <li><a href="{% url 'post-create' %}">Create Post</a></li>
+      <li><a href="{% url 'management:new_supplier' %}">Add New Supplier</a></li>
       <li class="relative">
         <div class="absolute top-2 right-0"
         hx-get="{% url 'notify-inbox' %}"

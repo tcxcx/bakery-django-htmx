@@ -40,8 +40,8 @@
       display: none !important;
     }
     :root {
-      --primary: rgb(88, 40, 244);
-      --primary-hover: rgb(69, 29, 200);
+      --primary: rgb(115, 209, 207);
+      --primary-hover: rgb(101, 189, 176);
       --black: #1f2937;
       --font1: "Open Sans", sans-serif;
     }
@@ -286,88 +286,9 @@
   <body>
     {% include 'includes/messages.html' %}
     {% include 'includes/header.html' %}
-    <div class="mb-1">
-      <nav class="navbar navbar-expand-md navbar-light bg-light">
-        <div class="container-fluid">
-          <button class="navbar-toggler navbar-toggler-right"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#navbarSupportedContent"
-                  aria-controls="navbarSupportedContent"
-                  aria-expanded="false"
-                  aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <a class="navbar-brand" href="{% url 'home' %}">Bakery App</a>
-          <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-              <li class="nav-item active">
-                <a class="nav-link" href="{% url 'home' %}">Home <span class="visually-hidden">(current)</span></a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="{% url 'about' %}">About</a>
-              </li>
-              {% if request.user.is_authenticated %}
-                <li class="nav-item">
-                  <a class="nav-link" href="{% url 'users:detail' request.user.pk %}">{% translate "My Profile" %}</a>
-                </li>
-                <li class="nav-item">
-                  {# URL provided by django-allauth/account/urls.py #}
-                  <a class="nav-link" href="{% url 'account_logout' %}">{% translate "Sign Out" %}</a>
-                </li>
-              {% else %}
-                {% if ACCOUNT_ALLOW_REGISTRATION %}
-                  <li class="nav-item">
-                    {# URL provided by django-allauth/account/urls.py #}
-                    <a id="sign-up-link" class="nav-link" href="{% url 'account_signup' %}">{% translate "Sign Up" %}</a>
-                  </li>
-                {% endif %}
-                <li class="nav-item">
-                  {# URL provided by django-allauth/account/urls.py #}
-                  <a id="log-in-link" class="nav-link" href="{% url 'account_login' %}">{% translate "Log In" %}</a>
-                </li>
-              {% endif %}
-            </ul>
-          </div>
-        </div>
-      </nav>
-    </div>
     <div class="container">
-      {% if messages %}
-        {% for message in messages %}
-          <div class="alert alert-dismissible {% if message.tags %}alert-{{ message.tags }}{% endif %}">
-            {{ message }}
-            <button type="button"
-                    class="btn-close"
-                    data-bs-dismiss="alert"
-                    aria-label="Close"></button>
-          </div>
-        {% endfor %}
-      {% endif %}
-      {% block content %}
-      <div class="container">
-          <h1>Welcome to Bakery App</h1>
-          <p>This is the home page. You can access the following features:</p>
-          <ul>
-            <a href="{% url 'management:list_suppliers' %}">View Suppliers</a>
-              <!-- Add links to other views here -->
-          </ul>
-      </div>
-      {% endblock content %}
+      {% block layout %}
+      {% endblock %}
     </div>
-    <!-- /container -->
-    {% block modal %}
-    {% endblock modal %}
-    {% block inline_javascript %}
-      {% comment %}
-    Script tags with only code, no src (defer by default). To run
-    with a "defer" so that you run inline code:
-    <script>
-      window.addEventListener('DOMContentLoaded', () => {
-        /* Run whatever you want */
-      });
-    </script>
-      {% endcomment %}
-    {% endblock inline_javascript %}
   </body>
 </html>
