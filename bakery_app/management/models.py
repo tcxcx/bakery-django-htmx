@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models import Sum, F, ExpressionWrapper, DecimalField
+
 import uuid
 
 
@@ -42,6 +44,17 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
+    def calculate_cost(self):
+        # Calculate the total cost of preparations for this product
+        total_cost = self.preparation_set.aggregate(
+            cost=ExpressionWrapper(
+                Sum(F('supplies__price_per_gram') * F('supplies__quantity_in_grams')),
+                output_field=DecimalField(max_digits=10, decimal_places=2)
+            )
+        )['cost']
+
+        return total_cost
+
 class Preparation(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
@@ -49,6 +62,13 @@ class Preparation(models.Model):
 
     def __str__(self):
         return self.name
+
+    def calculate_cost(self):
+    # Calculate the total cost of supplies for this preparation
+        total_cost = self.supplies.aggregate(
+            cost=Sum(models.F('supply__price_per_gram') * models.F('quantity_in_grams'))
+        )['cost']
+        return total_cost
 
 class PreparationSupply(models.Model):
     preparation = models.ForeignKey(Preparation, on_delete=models.CASCADE)
