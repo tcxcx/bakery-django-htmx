@@ -13,7 +13,7 @@ urlpatterns = [
     path('suppliers/<uuid:pk>/update/', SupplierUpdateView.as_view(), name='supplier-update'),
     path('suppliers/<uuid:pk>/delete/', SupplierDeleteView.as_view(), name='supplier-delete'),
 
-    # Supply URLs
+    # Supply URLs (if needed)
     path('supplies/', SupplyListView.as_view(), name='supply-list'),
     path('supplies/new/', SupplyCreateView.as_view(), name='supply-create'),
     path('supplies/<int:pk>/update/', SupplyUpdateView.as_view(), name='supply-update'),

@@ -44,7 +44,6 @@ class SupplyDeleteView(DeleteView):
     template_name = 'supply_confirm_delete.html'
     success_url = reverse_lazy('supply-list')
 
-
 # Product views
 class ProductListView(ListView):
     model = Product

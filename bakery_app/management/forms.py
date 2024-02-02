@@ -1,5 +1,5 @@
 from django import forms
-from .models import Supply, Supplier, ProductType, Product, Preparation, PreparationSupply
+from .models import Supplier, PreparationSupply, Preparation, Product, ProductType, Supply
 
 class SupplierForm(forms.ModelForm):
     class Meta:
@@ -20,7 +20,6 @@ class SupplierForm(forms.ModelForm):
             'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Enter your address'}),
         }
 
-
 class SupplyForm(forms.ModelForm):
     class Meta:
         model = Supply
@@ -35,8 +34,6 @@ class SupplyForm(forms.ModelForm):
             'price_per_gram': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter price per gram'}),
             'supplier': forms.Select(attrs={'class': 'form-control'}),
         }
-
-
 
 class ProductTypeForm(forms.ModelForm):
     class Meta:
