@@ -41,37 +41,15 @@
     x-transition:enter-end="opacity-100 translate-y-0"
   >
     <ul
-      class="flex items-center navitems flex-col md:flex-row gap-8 md:gap-0 justify-center h-full -translate-y-10 md:translate-y-0"
+      class="flex items-center navitems flex-col md:flex-row gap-8 md:gap-0 justify-end h-full -translate-y-10 md:translate-y-0"
     >
       {% if user.is_authenticated %}
       <li><a href="/">Home</a></li>
       <li><a href="{% url 'management:new_supplier' %}">Add New Supplier</a></li>
+      <li><a href="{% url 'account_logout' %}">Log Out</a></li> <!-- Add Log Out link here -->
       <li class="relative">
-        <div class="absolute top-2 right-0"
-        hx-get="{% url 'notify-inbox' %}"
-        hx-trigger="load"
-        hx-target="this"
-        hx-swap="innerHTML"
-        >
-        </div>
-        <a href="{% url 'inbox' %}"> Inbox </a></li>
+
       <li x-data="{ dropdownOpen: false }" class="relative">
-        <a
-          @click="dropdownOpen = !dropdownOpen"
-          @click.away="dropdownOpen = false"
-          class="cursor-pointer select-none"
-        >
-          <img
-            class="h-8 w-8 rounded-full object-cover"
-            src="{{ user.profile.avatar }}"
-          />
-          {{ user.profile.name }}
-          <img
-            x-bind:class="dropdownOpen && 'rotate-180 duration-300'"
-            class="w-4"
-            src="https://img.icons8.com/small/32/777777/expand-arrow.png"
-          />
-        </a>
         <div
           x-show="dropdownOpen"
           x-cloak
@@ -81,8 +59,6 @@
           x-transition:enter-end="opacity-100 translate-y-0 scale-100"
         >
           <ul class="hoverlist [&>li>a]:justify-end">
-            <li><a href="{% url 'profile' %}">My Profile</a></li>
-            <li><a href="{% url 'profile-edit' %}">Edit Profile</a></li>
             <li><a href="{% url 'account_logout' %}">Log Out</a></li>
           </ul>
         </div>

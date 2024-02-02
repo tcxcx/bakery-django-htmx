@@ -1,28 +1,88 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from .models import Supplier
-from .forms import SupplierForm
+from django.urls import reverse_lazy
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from .models import Supplier, Supply, Product, Preparation
 
-def list_suppliers(request):
-    suppliers = Supplier.objects.all()
-    return render(request, 'management/suppliers/list.html', {'suppliers': suppliers})
+# Supplier views
+class SupplierListView(ListView):
+    model = Supplier
+    template_name = 'supplier_list.html'
+    context_object_name = 'suppliers'
 
-def supplier_form(request, pk=None):
-    if pk:
-        supplier = get_object_or_404(Supplier, pk=pk)
-    else:
-        supplier = Supplier()  # Create a new instance if no pk is provided
+class SupplierCreateView(CreateView):
+    model = Supplier
+    template_name = 'supplier_form.html'
+    fields = '__all__'
 
-    if request.method == "POST":
-        form = SupplierForm(request.POST, instance=supplier)
-        if form.is_valid():
-            form.save()
-            return redirect('list_suppliers')  # Redirect to the list view
-    else:
-        form = SupplierForm(instance=supplier)
+class SupplierUpdateView(UpdateView):
+    model = Supplier
+    template_name = 'supplier_form.html'
+    fields = '__all__'
 
-    return render(request, 'management/suppliers/form.html', {'form': form})
+class SupplierDeleteView(DeleteView):
+    model = Supplier
+    template_name = 'supplier_confirm_delete.html'
+    success_url = reverse_lazy('supplier-list')
 
-def delete_supplier(request, pk):
-    supplier = get_object_or_404(Supplier, pk=pk)
-    supplier.delete()
-    return redirect('list_suppliers')
+# Supply views
+class SupplyListView(ListView):
+    model = Supply
+    template_name = 'supply_list.html'
+    context_object_name = 'supplies'
+
+class SupplyCreateView(CreateView):
+    model = Supply
+    template_name = 'supply_form.html'
+    fields = '__all__'
+
+class SupplyUpdateView(UpdateView):
+    model = Supply
+    template_name = 'supply_form.html'
+    fields = '__all__'
+
+class SupplyDeleteView(DeleteView):
+    model = Supply
+    template_name = 'supply_confirm_delete.html'
+    success_url = reverse_lazy('supply-list')
+
+
+# Product views
+class ProductListView(ListView):
+    model = Product
+    template_name = 'product_list.html'
+    context_object_name = 'products'
+
+class ProductCreateView(CreateView):
+    model = Product
+    template_name = 'product_form.html'
+    fields = '__all__'
+
+class ProductUpdateView(UpdateView):
+    model = Product
+    template_name = 'product_form.html'
+    fields = '__all__'
+
+class ProductDeleteView(DeleteView):
+    model = Product
+    template_name = 'product_confirm_delete.html'
+    success_url = reverse_lazy('product-list')
+
+# Preparation views
+class PreparationListView(ListView):
+    model = Preparation
+    template_name = 'preparation_list.html'
+    context_object_name = 'preparations'
+
+class PreparationCreateView(CreateView):
+    model = Preparation
+    template_name = 'preparation_form.html'
+    fields = '__all__'
+
+class PreparationUpdateView(UpdateView):
+    model = Preparation
+    template_name = 'preparation_form.html'
+    fields = '__all__'
+
+class PreparationDeleteView(DeleteView):
+    model = Preparation
+    template_name = 'preparation_confirm_delete.html'
+    success_url = reverse_lazy('preparation-list')
