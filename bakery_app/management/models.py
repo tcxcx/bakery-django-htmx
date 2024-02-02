@@ -1,6 +1,7 @@
 from django.db import models
 import uuid
-# Create your models here.
+
+
 class Supplier(models.Model):
     name = models.CharField(max_length=255)
     ruc = models.CharField(max_length=13)

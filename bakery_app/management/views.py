@@ -10,12 +10,12 @@ class SupplierListView(ListView):
 
 class SupplierCreateView(CreateView):
     model = Supplier
-    template_name = 'supplier_form.html'
+    template_name = 'management/suppliers/form.html'
     fields = '__all__'
 
 class SupplierUpdateView(UpdateView):
     model = Supplier
-    template_name = 'supplier_form.html'
+    template_name = 'management/suppliers/form.html'
     fields = '__all__'
 
 class SupplierDeleteView(DeleteView):

@@ -9,11 +9,11 @@ app_name = "management"
 urlpatterns = [
     # Supplier URLs
     path('suppliers/', SupplierListView.as_view(), name='supplier-list'),
-    path('suppliers/new/', SupplierCreateView.as_view(), name='supplier-create'),
+    path('suppliers/new/', SupplierCreateView.as_view(), name='new_supplier'),
     path('suppliers/<uuid:pk>/update/', SupplierUpdateView.as_view(), name='supplier-update'),
     path('suppliers/<uuid:pk>/delete/', SupplierDeleteView.as_view(), name='supplier-delete'),
 
-    # Supply URLs (if needed)
+    # Supply URLs
     path('supplies/', SupplyListView.as_view(), name='supply-list'),
     path('supplies/new/', SupplyCreateView.as_view(), name='supply-create'),
     path('supplies/<int:pk>/update/', SupplyUpdateView.as_view(), name='supply-update'),
