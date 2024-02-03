@@ -45,7 +45,7 @@ class Product(models.Model):
         return self.name
 
     def calculate_cost(self):
-        # Calculate the total cost of preparations for this product
+        # Calculate the total cost of preparations for product
         total_cost = self.preparation_set.aggregate(
             cost=ExpressionWrapper(
                 Sum(F('supplies__price_per_gram') * F('supplies__quantity_in_grams')),
@@ -54,6 +54,12 @@ class Product(models.Model):
         )['cost']
 
         return total_cost
+
+    def calculate_margin(self):
+        # Calculate the margin percentage
+        cost = self.calculate_cost()
+        margin = ((self.sale_price - cost) / self.sale_price) * 100
+        return margin
 
 class Preparation(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)

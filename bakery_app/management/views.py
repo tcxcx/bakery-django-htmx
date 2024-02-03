@@ -1,6 +1,10 @@
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from .models import Supplier, Supply, Product, Preparation
+from .models import Supplier, Supply, Product, Preparation, Product
+from django_tables2 import SingleTableMixin
+from django_filters.views import FilterView
+from .tables import ProductTable
+from .filters import ProductFilter
 
 # Supplier views
 class SupplierListView(ListView):
@@ -85,3 +89,17 @@ class PreparationDeleteView(DeleteView):
     model = Preparation
     template_name = 'preparation_confirm_delete.html'
     success_url = reverse_lazy('preparation-list')
+
+class ProductHTMxTableView(SingleTableMixin, FilterView):
+    table_class = ProductTable
+    queryset = Product.objects.all()
+    filterset_class = ProductFilter
+    paginate_by = 15
+
+    def get_template_names(self):
+        if self.request.htmx:
+            template_name = "suppliers/product_table_partial.html"
+        else:
+            template_name = "suppliers/product_table_htmx.html"
+
+        return template_name
