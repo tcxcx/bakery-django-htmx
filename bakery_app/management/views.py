@@ -1,9 +1,13 @@
+import json
+
 from django.urls import reverse_lazy
 from django.shortcuts import render
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from .models import Supplier, Supply, Product, Preparation, Product
 from .tables import ProductTable, RecipeTable, SupplierTable, IngredientTable
 from django_tables2 import SingleTableView
+from django.http import HttpResponse
+from .forms import SupplierForm
 from django.views import View
 
 # Supplier views
@@ -110,3 +114,22 @@ class IngredientTableView(SingleTableView, View):
     model = Supply
     table_class = IngredientTable
     template_name = 'management/suppliers/ingredient_table.html'
+
+
+def add_supplier(request):
+    if request.method == "POST":
+        form = SupplierForm(request.POST)
+        if form.is_valid():
+            supplier = form.save()
+            return HttpResponse(
+                status=204,
+                headers={
+                    'HX-Trigger': json.dumps({
+                        "showMessage": f"{supplier.name} added."
+                    })
+                })
+    else:
+        form = SupplierForm()
+    return render(request, 'management/suppliers/form.html', {
+        'form': form,
+    })

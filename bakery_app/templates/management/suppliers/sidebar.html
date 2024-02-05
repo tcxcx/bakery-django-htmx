@@ -12,9 +12,9 @@
     <ul class="hoverlist">
       <li>
         <a
-          hx-get="{% url 'management:product-table' %}"
+          hx-get="{% url 'management:new_supplier' %}"
+          hx-target="#dialog"
           hx-trigger-click
-          hx-target="div#product-table-container"
           hx-swap="outerHTML"
           hx-indicator=".progress"
         >
