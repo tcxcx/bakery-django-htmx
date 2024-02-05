@@ -1,36 +1,59 @@
+<!-- sidebar.html -->
 <aside
-    x-show="mobileSidebarOpen"
-    x-cloak
-    class="md:!block col-span-12 md:col-span-4 lg:mr-[20%] order-1 md:order-2"
-    x-transition:enter="duration-300 ease-out"
-    x-transition:enter-start="opacity-0 -mt-96"
-    x-transition:enter-end="opacity-100 mt-0"
-  >
-    <section class="card p-4">
-      <h2>Manage</h2>
-      <ul class="hoverlist">
-        <li>
-          <a href="{% url 'management:supplier-list' %}">
-            <span class="font-bold text-sm">Product List</span>
-          </a>
-        </li>
-        <li>
-          <a href="{% url 'management:supplier-list' %}">
-            <span class="font-bold text-sm">Create Product</span>
-          </a>
-        </li>
-        <li>
-          <a href="{% url 'management:supplier-list' %}">
-            <span class="font-bold text-sm">Supplier List</span>
-          </a>
-        </li>
-        <li>
-          <a href="{% url 'management:supplier-list' %}">
-            <span class="font-bold text-sm">Create Supplier</span>
-          </a>
-        </li>
-        <!-- Add links for other CRUD actions here -->
-      </ul>
-    </section>
-    <!-- Add other sections for different models if needed -->
-  </aside>
+  x-show="mobileSidebarOpen"
+  x-cloak
+  class="md:!block col-span-12 md:col-span-4 lg:mr-[20%] order-1 md:order-2"
+  x-transition:enter="duration-300 ease-out"
+  x-transition:enter-start="opacity-0 -mt-96"
+  x-transition:enter-end="opacity-100 mt-0"
+>
+  <section class="card p-4">
+    <h2>Manage</h2>
+    <ul class="hoverlist">
+      <li>
+        <a
+          hx-get="{% url 'management:product-table' %}"
+          hx-trigger-click
+          hx-target="div#product-table-container"
+          hx-swap="outerHTML"
+          hx-indicator=".progress"
+        >
+          <span class="font-bold text-sm">Product List</span>
+        </a>
+      </li>
+      <li>
+        <a
+          hx-get="{% url 'management:recipe-table' %}"
+          hx-trigger-click
+          hx-target="div#recipe-table-container"
+          hx-swap="outerHTML"
+          hx-indicator=".progress"
+        >
+          <span class="font-bold text-sm">Recipe List</span>
+        </a>
+      </li>
+      <li>
+        <a
+          hx-get="{% url 'management:supplier-table' %}"
+          hx-trigger-click
+          hx-target="div#supplier-table-container"
+          hx-swap="outerHTML"
+          hx-indicator=".progress"
+        >
+          <span class="font-bold text-sm">Supplier List</span>
+        </a>
+      </li>
+      <li>
+        <a
+          hx-get="{% url 'management:ingredient-table' %}"
+          hx-trigger-click
+          hx-target="div#ingredient-table-container"
+          hx-swap="outerHTML"
+          hx-indicator=".progress"
+        >
+          <span class="font-bold text-sm">Ingredient List</span>
+        </a>
+      </li>
+    </ul>
+  </section>
+</aside>

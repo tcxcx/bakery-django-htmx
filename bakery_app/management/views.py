@@ -2,7 +2,7 @@ from django.urls import reverse_lazy
 from django.shortcuts import render
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from .models import Supplier, Supply, Product, Preparation, Product
-from .tables import ProductTable
+from .tables import ProductTable, RecipeTable, SupplierTable, IngredientTable
 from django_tables2 import SingleTableView
 from django.views import View
 
@@ -91,8 +91,22 @@ class PreparationDeleteView(DeleteView):
     success_url = reverse_lazy('preparation-list')
 
 
-
 class ProductTableView(SingleTableView, View):
     model = Product
     table_class = ProductTable
     template_name = 'management/suppliers/product_table_htmx.html'
+
+class RecipeTableView(SingleTableView, View):
+    model = Preparation
+    table_class = RecipeTable
+    template_name = 'management/suppliers/recipe_table.html'
+
+class SupplierTableView(SingleTableView, View):
+    model = Supplier
+    table_class = SupplierTable
+    template_name = 'management/suppliers/supplier_table.html'
+
+class IngredientTableView(SingleTableView, View):
+    model = Supply
+    table_class = IngredientTable
+    template_name = 'management/suppliers/ingredient_table.html'

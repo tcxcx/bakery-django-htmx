@@ -3,7 +3,7 @@ from .views import SupplierListView, SupplierCreateView, SupplierUpdateView, Sup
 from .views import SupplyListView, SupplyCreateView, SupplyUpdateView, SupplyDeleteView
 from .views import ProductListView, ProductCreateView, ProductUpdateView, ProductDeleteView
 from .views import PreparationListView, PreparationCreateView, PreparationUpdateView, PreparationDeleteView
-from .views import ProductTableView
+from .views import ProductTableView, SupplierTableView, IngredientTableView, RecipeTableView
 
 app_name = "management"
 
@@ -34,4 +34,8 @@ urlpatterns = [
 
     # Table URLs
     path('product-table/', ProductTableView.as_view(), name='product-table'),
+    path('recipe-table/', RecipeTableView.as_view(), name='recipe-table'),
+    path('supplier-table/', SupplierTableView.as_view(), name='supplier-table'),
+    path('ingredient-table/', IngredientTableView.as_view(), name='ingredient-table'),
+
 ]
