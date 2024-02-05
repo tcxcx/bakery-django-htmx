@@ -7,7 +7,7 @@ from .models import Supplier, Supply, Product, Preparation, Product
 from .tables import ProductTable, RecipeTable, SupplierTable, IngredientTable
 from django_tables2 import SingleTableView
 from django.http import HttpResponse
-from .forms import SupplierForm
+from .forms import SupplierForm, SupplyForm, ProductTypeForm, ProductForm, PreparationForm, PreparationSupplyForm
 from django.views import View
 
 # Supplier views
@@ -130,6 +130,80 @@ def add_supplier(request):
                 })
     else:
         form = SupplierForm()
-    return render(request, 'management/suppliers/form.html', {
+    return render(request, 'management/suppliers/form_supplier.html', {
+        'form': form,
+    })
+
+def add_product_type(request):
+    if request.method == "POST":
+        form = ProductTypeForm(request.POST)
+        if form.is_valid():
+            product = form.save()
+            return HttpResponse(
+                status=204,
+                headers={
+                    'HX-Trigger': json.dumps({
+                        "showMessage": f"{product.name} added."
+                    })
+                })
+    else:
+        form = ProductTypeForm()
+    return render(request, 'management/suppliers/form_product.html', {
+        'form': form,
+    })
+
+def add_product(request):
+    if request.method == "POST":
+        form = ProductForm(request.POST)
+        if form.is_valid():
+            product = form.save()
+            return HttpResponse(
+                status=204,
+                headers={
+                    'HX-Trigger': json.dumps({
+                        "showMessage": f"{product.name} added."
+                    })
+                })
+    else:
+        form = ProductForm()
+    return render(request, 'management/suppliers/form_product.html', {
+        'form': form,
+    })
+
+
+def add_recipe(request):
+    if request.method == "POST":
+        form = PreparationForm(request.POST)
+        if form.is_valid():
+            recipe = form.save()
+            return HttpResponse(
+                status=204,
+                headers={
+                    'HX-Trigger': json.dumps({
+                        "showMessage": f"{recipe.name} added."
+                    })
+                })
+    else:
+        form = PreparationForm()
+    return render(request, 'management/suppliers/form_supplier.html', {
+        'form': form,
+    })
+
+
+def add_supply(request):
+    if request.method == "POST":
+        form = SupplyForm(request.POST)
+        if form.is_valid():
+            supply = form.save()
+            return HttpResponse(
+                status=204,
+                headers={
+                    'HX-Trigger': json.dumps({
+                        "showMessage": f"{supply.name} added."
+                    })
+                })
+    else:
+        form = SupplyForm()
+    return render(request, 'management/suppliers/form_supply.html', {
         'form': form,
     })

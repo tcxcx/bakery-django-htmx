@@ -12,46 +12,57 @@
     <ul class="hoverlist">
       <li>
         <a
-          hx-get="{% url 'management:new_supplier' %}"
+          hx-get="{% url 'management:add_product_type' %}"
           hx-target="#dialog"
           hx-trigger-click
           hx-swap="outerHTML"
           hx-indicator=".progress"
         >
-          <span class="font-bold text-sm">Product List</span>
+          <span class="font-bold text-sm">Add a Product Type</span>
         </a>
       </li>
       <li>
         <a
-          hx-get="{% url 'management:recipe-table' %}"
+          hx-get="{% url 'management:add_product' %}"
+          hx-target="#dialog"
           hx-trigger-click
-          hx-target="div#recipe-table-container"
           hx-swap="outerHTML"
           hx-indicator=".progress"
         >
-          <span class="font-bold text-sm">Recipe List</span>
+          <span class="font-bold text-sm">Add a Product</span>
         </a>
       </li>
       <li>
         <a
-          hx-get="{% url 'management:supplier-table' %}"
+          hx-get="{% url 'management:add_recipe' %}"
+          hx-target="#dialog"
           hx-trigger-click
-          hx-target="div#supplier-table-container"
           hx-swap="outerHTML"
           hx-indicator=".progress"
         >
-          <span class="font-bold text-sm">Supplier List</span>
+          <span class="font-bold text-sm">Add a Recipe</span>
         </a>
       </li>
       <li>
         <a
-          hx-get="{% url 'management:ingredient-table' %}"
+          hx-get="{% url 'management:add_supplier' %}"
+          hx-target="#dialog"
           hx-trigger-click
-          hx-target="div#ingredient-table-container"
           hx-swap="outerHTML"
           hx-indicator=".progress"
         >
-          <span class="font-bold text-sm">Ingredient List</span>
+          <span class="font-bold text-sm">Add a Supplier</span>
+        </a>
+      </li>
+      <li>
+        <a
+          hx-get="{% url 'management:add_supply' %}"
+          hx-target="#dialog"
+          hx-trigger-click
+          hx-swap="outerHTML"
+          hx-indicator=".progress"
+        >
+          <span class="font-bold text-sm">Add a New Ingredient</span>
         </a>
       </li>
     </ul>
