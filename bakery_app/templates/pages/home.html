@@ -1,12 +1,46 @@
 {% extends 'base.html' %}
-
 {% block layout %}
 {% include 'includes/hero.html' %}
+{% block content %}
+<content
+  x-data="{ mobileSidebarOpen: false }"
+  class="grid grid-cols-12 max-w-7xl mx-auto my-6 px-6"
+>
+  <mobileSidebarNav
+    class="md:hidden col-span-12 md:col-span-1 mx-auto mb-6 z-10 relative"
+  >
+    <a
+      @click="mobileSidebarOpen = !mobileSidebarOpen"
+      class="flex items-center cursor-pointer select-none font-bold hover:bg-gray-200 rounded-lg p-3"
+    >
+      <span>Manage</span>
+      <img
+        x-bind:class="mobileSidebarOpen && 'rotate-180 duration-300'"
+        class="w-4 ml-1.5"
+        src="https://img.icons8.com/small/32/000000/expand-arrow.png"
+      />
+    </a>
+  </mobileSidebarNav>
+  <main class="col-span-12 md:col-span-8"> <!-- Updated col-span to 8 for 2/3 width -->
+    {% if user.is_authenticated %}
+    <div
+      hx-get="{% url 'management:product-table' %}"
+      hx-trigger="load"
+      hx-target="div.table-container"
+      hx-swap="outerHTML"
+      hx-on-load="loadTable()"
+    ></div>
+    <div class="table-container"></div>
+    {% endif %}
+  </main>
+  {% include 'management/suppliers/sidebar.html' %}
 
-      {% block content %}
-        {% if user.is_authenticated %}
-          {% include 'management/suppliers/product_table_htmx.html' %}
-        {% endif %}
-      {% endblock %}
-
+</content>
+<script>
+  function loadTable() {
+    var event = new Event("click");
+    document.querySelector('[hx-trigger="load"]').dispatchEvent(event);
+  }
+</script>
+{% endblock %}
 {% endblock %}

@@ -3,7 +3,7 @@ from .views import SupplierListView, SupplierCreateView, SupplierUpdateView, Sup
 from .views import SupplyListView, SupplyCreateView, SupplyUpdateView, SupplyDeleteView
 from .views import ProductListView, ProductCreateView, ProductUpdateView, ProductDeleteView
 from .views import PreparationListView, PreparationCreateView, PreparationUpdateView, PreparationDeleteView
-from .views import ProductHTMxTableView
+from .views import ProductTableView
 
 app_name = "management"
 
@@ -33,5 +33,5 @@ urlpatterns = [
     path('preparations/<int:pk>/delete/', PreparationDeleteView.as_view(), name='preparation-delete'),
 
     # Table URLs
-    path('product_htmx/', ProductHTMxTableView.as_view(), name='product_htmx'),
+    path('product-table/', ProductTableView.as_view(), name='product-table'),
 ]
