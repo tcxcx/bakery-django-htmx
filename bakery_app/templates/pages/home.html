@@ -1,9 +1,62 @@
-{% extends 'base.html' %} {% block layout %} {% include 'includes/hero.html' %}
-
-<content class="block">
-  <div class="container">
-    {% block content %}
-    {% endblock %}
-  </div>
+{% extends 'base.html' %}
+{% block layout %}
+{% include 'includes/hero.html' %}
+{% block content %}
+<content
+  x-data="{ mobileSidebarOpen: false, activeTable: 'product-table-container' }"
+  class="grid grid-cols-12 max-w-7xl mx-auto my-6 px-6"
+>
+  <mobileSidebarNav
+    class="md:hidden col-span-12 md:col-span-1 mx-auto mb-6 z-10 relative"
+  >
+    <a
+      @click="mobileSidebarOpen = !mobileSidebarOpen"
+      class="flex items-center cursor-pointer select-none font-bold hover:bg-gray-200 rounded-lg p-3"
+    >
+      <span>Manage</span>
+      <img
+        x-bind:class="mobileSidebarOpen && 'rotate-180 duration-300'"
+        class="w-4 ml-1.5"
+        src="https://img.icons8.com/small/32/000000/expand-arrow.png"
+      />
+    </a>
+  </mobileSidebarNav>
+  <main class="col-span-12 md:col-span-8">
+    {% if user.is_authenticated %}
+    <div hx-get="{% url 'management:product-table' %}" hx-trigger="load" hx-target="div.table-container" hx-swap="outerHTML" hx-on-load="loadTable()"></div>
+    <div class="table-container"></div>
+    {% endif %}
+  </main>
+  {% include 'management/suppliers/sidebar.html' %}
 </content>
-{% endblock %}
+<!-- Placeholder for the modal -->
+<div id="modal" class="modal fade p-10 lg:p-20 pt-10">
+  <div id="dialog" class="modal-dialog" hx-target="this"></div>
+</div>
+
+<script>
+  function loadTable() {
+      var event = new Event('click');
+      document.querySelector('[hx-trigger="load"]').dispatchEvent(event);
+  }
+</script>
+
+<script>
+  const modal = new bootstrap.Modal(document.getElementById("modal"));
+
+  htmx.on("htmx:afterSwap", (e) => {
+    // Response targeting #dialog => show the modal
+    if (e.detail.target.id == "dialog") {
+      modal.show();
+    }
+  });
+
+  htmx.on("htmx:beforeSwap", (e) => {
+    // Empty response targeting #dialog => hide the modal
+    if (e.detail.target.id == "dialog" && !e.detail.xhr.response) {
+      modal.hide();
+      e.detail.shouldSwap = false;
+    }
+  });
+</script>
+{% endblock %} {% endblock %}

@@ -45,8 +45,7 @@
     >
       {% if user.is_authenticated %}
       <li><a href="/">Home</a></li>
-      <li><a href="{% url 'management:new_supplier' %}">Add New Supplier</a></li>
-      <li><a href="{% url 'account_logout' %}">Log Out</a></li> <!-- Add Log Out link here -->
+      <li><a href="{% url 'account_logout' %}">Log Out</a></li>
       <li class="relative">
 
       <li x-data="{ dropdownOpen: false }" class="relative">

@@ -75,6 +75,7 @@ THIRD_PARTY_APPS = [
     "crispy_bootstrap5",
     "allauth",
     "allauth.account",
+    'django_tables2',
 ]
 
 LOCAL_APPS = [
