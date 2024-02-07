@@ -30,4 +30,14 @@
     </div>
   </form>
 </div>
+<script>
+  htmx.defineExtension('submit-form', (event) => {
+    event.on('htmx:afterRequest', (xhr) => {
+      if (xhr.status === 200) {
+        const modal = new bootstrap.Modal(document.getElementById("modal"));
+        modal.hide();
+      }
+    });
+  });
+</script>
 {% endblock %}

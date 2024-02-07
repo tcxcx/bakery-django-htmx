@@ -7,7 +7,7 @@ from .models import Supplier, Supply, Product, Preparation, Product
 from .tables import ProductTable, RecipeTable, SupplierTable, IngredientTable
 from django_tables2 import SingleTableView
 from django.http import HttpResponse
-from .forms import SupplierForm, SupplyForm, ProductTypeForm, ProductForm, PreparationForm, PreparationSupplyForm
+from .forms import SupplierForm, SupplyForm, ProductTypeForm, ProductForm, PreparationForm, ProductCreationForm
 from django.views import View
 
 # Supplier views
@@ -116,6 +116,7 @@ class IngredientTableView(SingleTableView, View):
     template_name = 'management/suppliers/ingredient_table.html'
 
 
+# modals
 def add_supplier(request):
     if request.method == "POST":
         form = SupplierForm(request.POST)
@@ -133,6 +134,7 @@ def add_supplier(request):
     return render(request, 'management/suppliers/form_supplier.html', {
         'form': form,
     })
+
 
 def add_product_type(request):
     if request.method == "POST":
@@ -188,7 +190,6 @@ def add_recipe(request):
     return render(request, 'management/suppliers/form_supplier.html', {
         'form': form,
     })
-
 
 def add_supply(request):
     if request.method == "POST":

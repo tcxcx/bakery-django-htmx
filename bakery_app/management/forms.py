@@ -1,5 +1,7 @@
 from django import forms
+from django.forms import formset_factory
 from .models import Supplier, PreparationSupply, Preparation, Product, ProductType, Supply
+
 
 class SupplierForm(forms.ModelForm):
     class Meta:
@@ -26,12 +28,12 @@ class SupplyForm(forms.ModelForm):
         fields = ['name', 'price_per_gram', 'supplier']
         labels = {
             'name': 'Name',
-            'price_per_gram': 'Price per Gram',
+            'price_per_gram': 'Price per Gram  [$/g]',
             'supplier': 'Supplier',
         }
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter supply name'}),
-            'price_per_gram': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter price per gram'}),
+            'price_per_gram': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter price per gram in [$/g]'}),
             'supplier': forms.Select(attrs={'class': 'form-control'}),
         }
 
@@ -53,14 +55,14 @@ class ProductForm(forms.ModelForm):
         labels = {
             'name': 'Name',
             'product_type': 'Product Type',
-            'sale_price': 'Sale Price',
+            'sale_price': 'Sale Price [$/g]',
             'shape': 'Shape',
             'dimensions': 'Dimensions (JSON)',
         }
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter product name'}),
             'product_type': forms.Select(attrs={'class': 'form-control'}),
-            'sale_price': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter sale price'}),
+            'sale_price': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter sale price [$/g]'}),
             'shape': forms.Select(attrs={'class': 'form-control'}),
             'dimensions': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter dimensions in JSON format'}),
         }
@@ -94,3 +96,30 @@ class PreparationSupplyForm(forms.ModelForm):
             'supply': forms.Select(attrs={'class': 'form-control'}),
             'quantity_in_grams': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter quantity in grams'}),
         }
+
+
+SupplierFormSet = formset_factory(SupplierForm, extra=1)
+SupplyFormSet = formset_factory(SupplyForm, extra=1)
+
+
+class ProductCreationForm(forms.Form):
+    # Fields from SupplyForm
+    supply_name = forms.CharField(max_length=255, label='Supply Name', widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter supply name'}))
+    price_per_gram = forms.DecimalField(max_digits=10, decimal_places=2, label='Price per Gram [$]', widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter price per gram in [$/g]'}))
+    supplier = forms.CharField(max_length=255, label='Supplier Name', widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter supplier name'}))
+
+    # Fields from ProductTypeForm
+    product_type_name = forms.CharField(max_length=255, label='Product Type Name', widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter product type name'}))
+
+    # Fields from ProductForm
+    product_name = forms.CharField(max_length=255, label='Product Name', widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter product name'}))
+    sale_price = forms.DecimalField(max_digits=10, decimal_places=2, label='Sale Price [$]', widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter sale price [$/g]'}))
+    shape = forms.ChoiceField(choices=Product.SHAPE_CHOICES, label='Shape', widget=forms.Select(attrs={'class': 'form-control'}))
+    dimensions = forms.JSONField(label='Dimensions (JSON)', widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter dimensions in JSON format'}))
+
+    # Fields from PreparationForm
+    preparation_name = forms.CharField(max_length=255, label='Preparation Name', widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter preparation name'}))
+    supplies = forms.ModelMultipleChoiceField(queryset=Supply.objects.all(), label='Supplies', widget=forms.SelectMultiple(attrs={'class': 'form-control'}))
+
+    # Fields from PreparationSupplyForm
+    quantity_in_grams = forms.DecimalField(max_digits=10, decimal_places=2, label='Quantity in Grams', widget=forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter quantity in grams'}))

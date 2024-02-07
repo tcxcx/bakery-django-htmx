@@ -3,7 +3,6 @@ from django.db.models import Sum, F, ExpressionWrapper, DecimalField
 
 import uuid
 
-
 class Supplier(models.Model):
     name = models.CharField(max_length=255)
     ruc = models.CharField(max_length=13)
@@ -45,21 +44,21 @@ class Product(models.Model):
         return self.name
 
     def calculate_cost(self):
-        # Calculate the total cost of preparations for product
+        # Your existing implementation...
         total_cost = self.preparation_set.aggregate(
             cost=ExpressionWrapper(
-                Sum(F('supplies__price_per_gram') * F('supplies__quantity_in_grams')),
+                Sum(F('supplies__price_per_gram') * F('preparationsupply__quantity_in_grams')),
                 output_field=DecimalField(max_digits=10, decimal_places=2)
             )
         )['cost']
-
-        return total_cost
+        return total_cost or 0
 
     def calculate_margin(self):
-        # Calculate the margin percentage
         cost = self.calculate_cost()
-        margin = ((self.sale_price - cost) / self.sale_price) * 100
-        return margin
+        if self.sale_price > 0:  # Prevent division by zero
+            margin = ((self.sale_price - cost) / self.sale_price) * 100
+            return margin
+        return 0
 
 class Preparation(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -83,3 +82,4 @@ class PreparationSupply(models.Model):
 
     def __str__(self):
         return f"{self.supply.name} for {self.preparation.name}"
+

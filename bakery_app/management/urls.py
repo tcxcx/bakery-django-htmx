@@ -45,5 +45,4 @@ urlpatterns = [
     path('recipe/add', add_recipe, name='add_recipe'),
     path('product/add', add_product, name='add_product'),
     path('product-type/add', add_product_type, name='add_product_type'),
-
 ]
