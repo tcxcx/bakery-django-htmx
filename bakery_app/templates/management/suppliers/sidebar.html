@@ -8,41 +8,8 @@
   x-transition:enter-end="opacity-100 mt-0"
 >
   <section class="card p-4">
-    <h2>Manage</h2>
+    <h2>Step 1</h2>
     <ul class="hoverlist">
-      <li>
-        <a
-          hx-get="{% url 'management:add_product_type' %}"
-          hx-target="#dialog"
-          hx-trigger-click
-          hx-swap="outerHTML"
-          hx-indicator=".progress"
-        >
-          <span class="font-bold text-sm">Add a Product Type</span>
-        </a>
-      </li>
-      <li>
-        <a
-          hx-get="{% url 'management:add_product' %}"
-          hx-target="#dialog"
-          hx-trigger-click
-          hx-swap="outerHTML"
-          hx-indicator=".progress"
-        >
-          <span class="font-bold text-sm">Add a Product</span>
-        </a>
-      </li>
-      <li>
-        <a
-          hx-get="{% url 'management:add_recipe' %}"
-          hx-target="#dialog"
-          hx-trigger-click
-          hx-swap="outerHTML"
-          hx-indicator=".progress"
-        >
-          <span class="font-bold text-sm">Add a Recipe</span>
-        </a>
-      </li>
       <li>
         <a
           hx-get="{% url 'management:add_supplier' %}"
@@ -54,15 +21,47 @@
           <span class="font-bold text-sm">Add a Supplier</span>
         </a>
       </li>
+    </ul>
+    <h2>Step 2</h2>
+    <ul class="hoverlist">
       <li>
+        <!-- need to create a list Ingredient form -->
         <a
-          hx-get="{% url 'management:add_supply' %}"
+          hx-get="{% url 'management:add_product' %}"
           hx-target="#dialog"
           hx-trigger-click
           hx-swap="outerHTML"
           hx-indicator=".progress"
         >
-          <span class="font-bold text-sm">Add a New Ingredient</span>
+          <span class="font-bold text-sm">Add an Ingredient</span>
+        </a>
+      </li>
+    </ul>
+    <h2>Step 3</h2>
+    <ul class="hoverlist">
+      <li>
+        <a
+          hx-get="{% url 'management:add_recipe' %}"
+          hx-target="#dialog"
+          hx-trigger-click
+          hx-swap="outerHTML"
+          hx-indicator=".progress"
+        >
+          <span class="font-bold text-sm">Add a Recipe</span>
+        </a>
+      </li>
+    </ul>
+    <h2>Step 4</h2>
+    <ul class="hoverlist">
+      <li>
+        <a
+          hx-get="{% url 'management:add_product' %}"
+          hx-target="#dialog"
+          hx-trigger-click
+          hx-swap="outerHTML"
+          hx-indicator=".progress"
+        >
+          <span class="font-bold text-sm">List a Product</span>
         </a>
       </li>
     </ul>

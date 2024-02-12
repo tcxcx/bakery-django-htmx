@@ -1,13 +1,13 @@
 import json
 
 from django.urls import reverse_lazy
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from .models import Supplier, Supply, Product, Preparation, Product
-from .tables import ProductTable, RecipeTable, SupplierTable, IngredientTable
+from .models import Supplier, Ingredient, Recipe, Product
+from .tables import ProductTable
 from django_tables2 import SingleTableView
 from django.http import HttpResponse
-from .forms import SupplierForm, SupplyForm, ProductTypeForm, ProductForm, PreparationForm, ProductCreationForm
+from .forms import SupplierForm, IngredientForm, RecipeForm, RecipeIngredientFormSet, ProductForm
 from django.views import View
 
 # Supplier views
@@ -31,26 +31,29 @@ class SupplierDeleteView(DeleteView):
     template_name = 'supplier_confirm_delete.html'
     success_url = reverse_lazy('supplier-list')
 
-# Supply views
-class SupplyListView(ListView):
-    model = Supply
-    template_name = 'supply_list.html'
-    context_object_name = 'supplies'
+# Ingredient views (replacing Supply views)
+class IngredientListView(ListView):
+    model = Ingredient
+    template_name = 'management/ingredients/list.html'
+    context_object_name = 'ingredients'
 
-class SupplyCreateView(CreateView):
-    model = Supply
-    template_name = 'supply_form.html'
-    fields = '__all__'
+class IngredientCreateView(CreateView):
+    model = Ingredient
+    form_class = IngredientForm  # Assuming you create an IngredientForm
+    template_name = 'management/ingredients/create_update.html'
+    success_url = reverse_lazy('management:ingredient-list')
 
-class SupplyUpdateView(UpdateView):
-    model = Supply
-    template_name = 'supply_form.html'
-    fields = '__all__'
+class IngredientUpdateView(UpdateView):
+    model = Ingredient
+    form_class = IngredientForm
+    template_name = 'management/ingredients/create_update.html'
+    success_url = reverse_lazy('management:ingredient-list')
 
-class SupplyDeleteView(DeleteView):
-    model = Supply
-    template_name = 'supply_confirm_delete.html'
-    success_url = reverse_lazy('supply-list')
+class IngredientDeleteView(DeleteView):
+    model = Ingredient
+    template_name = 'management/ingredients/delete_confirm.html'
+    success_url = reverse_lazy('management:ingredient-list')
+
 
 # Product views
 class ProductListView(ListView):
@@ -73,48 +76,61 @@ class ProductDeleteView(DeleteView):
     template_name = 'product_confirm_delete.html'
     success_url = reverse_lazy('product-list')
 
-# Preparation views
-class PreparationListView(ListView):
-    model = Preparation
-    template_name = 'preparation_list.html'
-    context_object_name = 'preparations'
+# Recipe views
+class RecipeListView(ListView):
+    model = Recipe
+    template_name = 'management/recipes/list.html'
+    context_object_name = 'recipes'
 
-class PreparationCreateView(CreateView):
-    model = Preparation
-    template_name = 'preparation_form.html'
-    fields = '__all__'
+class RecipeCreateView(View):
+    template_name = 'management/recipes/create_update.html'
 
-class PreparationUpdateView(UpdateView):
-    model = Preparation
-    template_name = 'preparation_form.html'
-    fields = '__all__'
+    def get(self, request, *args, **kwargs):
+        form = RecipeForm()
+        formset = RecipeIngredientFormSet()
+        return render(request, self.template_name, {'form': form, 'formset': formset})
 
-class PreparationDeleteView(DeleteView):
-    model = Preparation
-    template_name = 'preparation_confirm_delete.html'
-    success_url = reverse_lazy('preparation-list')
+    def post(self, request, *args, **kwargs):
+        form = RecipeForm(request.POST)
+        formset = RecipeIngredientFormSet(request.POST)
+        if form.is_valid() and formset.is_valid():
+            recipe = form.save()
+            formset.instance = recipe
+            formset.save()
+            return redirect('recipe-list')  # Update with your correct success URL
+        return render(request, self.template_name, {'form': form, 'formset': formset})
+
+class RecipeUpdateView(View):
+    template_name = 'management/recipes/create_update.html'
+
+    def get(self, request, pk, *args, **kwargs):
+        recipe = Recipe.objects.get(pk=pk)
+        form = RecipeForm(instance=recipe)
+        formset = RecipeIngredientFormSet(instance=recipe)
+        return render(request, self.template_name, {'form': form, 'formset': formset, 'object': recipe})
+
+    def post(self, request, pk, *args, **kwargs):
+        recipe = Recipe.objects.get(pk=pk)
+        form = RecipeForm(request.POST, instance=recipe)
+        formset = RecipeIngredientFormSet(request.POST, instance=recipe)
+        if form.is_valid() and formset.is_valid():
+            form.save()
+            formset.save()
+            return redirect('recipe-list')  # Update with your correct success URL
+        return render(request, self.template_name, {'form': form, 'formset': formset, 'object': recipe})
+
+class RecipeDeleteView(DeleteView):
+    model = Recipe
+    template_name = 'management/recipes/delete_confirm.html'
+    success_url = reverse_lazy('recipe-list')
+
+# table view
 
 
 class ProductTableView(SingleTableView, View):
     model = Product
     table_class = ProductTable
     template_name = 'management/suppliers/product_table_htmx.html'
-
-class RecipeTableView(SingleTableView, View):
-    model = Preparation
-    table_class = RecipeTable
-    template_name = 'management/suppliers/recipe_table.html'
-
-class SupplierTableView(SingleTableView, View):
-    model = Supplier
-    table_class = SupplierTable
-    template_name = 'management/suppliers/supplier_table.html'
-
-class IngredientTableView(SingleTableView, View):
-    model = Supply
-    table_class = IngredientTable
-    template_name = 'management/suppliers/ingredient_table.html'
-
 
 # modals
 def add_supplier(request):
@@ -136,23 +152,6 @@ def add_supplier(request):
     })
 
 
-def add_product_type(request):
-    if request.method == "POST":
-        form = ProductTypeForm(request.POST)
-        if form.is_valid():
-            product = form.save()
-            return HttpResponse(
-                status=204,
-                headers={
-                    'HX-Trigger': json.dumps({
-                        "showMessage": f"{product.name} added."
-                    })
-                })
-    else:
-        form = ProductTypeForm()
-    return render(request, 'management/suppliers/form_product.html', {
-        'form': form,
-    })
 
 def add_product(request):
     if request.method == "POST":
@@ -175,7 +174,7 @@ def add_product(request):
 
 def add_recipe(request):
     if request.method == "POST":
-        form = PreparationForm(request.POST)
+        form = RecipeForm(request.POST)
         if form.is_valid():
             recipe = form.save()
             return HttpResponse(
@@ -186,14 +185,14 @@ def add_recipe(request):
                     })
                 })
     else:
-        form = PreparationForm()
+        form = RecipeForm()
     return render(request, 'management/suppliers/form_supplier.html', {
         'form': form,
     })
 
 def add_supply(request):
     if request.method == "POST":
-        form = SupplyForm(request.POST)
+        form = IngredientForm(request.POST)
         if form.is_valid():
             supply = form.save()
             return HttpResponse(
@@ -204,7 +203,7 @@ def add_supply(request):
                     })
                 })
     else:
-        form = SupplyForm()
+        form = IngredientForm()
     return render(request, 'management/suppliers/form_supply.html', {
         'form': form,
     })

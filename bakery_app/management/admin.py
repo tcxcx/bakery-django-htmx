@@ -1,30 +1,30 @@
 from django.contrib import admin
-from .models import Supplier, Supply, ProductType, Product, Preparation
+from .models import Supplier, Ingredient, Recipe, RecipeIngredient, Product
 
 @admin.register(Supplier)
 class SupplierAdmin(admin.ModelAdmin):
     list_display = ('name', 'ruc', 'email', 'phone', 'address')
     search_fields = ('name', 'ruc')
 
-@admin.register(Supply)
-class SupplyAdmin(admin.ModelAdmin):
+@admin.register(Ingredient)
+class IngredientAdmin(admin.ModelAdmin):
     list_display = ('name', 'price_per_gram', 'supplier')
     list_filter = ('supplier',)
     search_fields = ('name',)
 
-@admin.register(ProductType)
-class ProductTypeAdmin(admin.ModelAdmin):
-    list_display = ('name',)
+@admin.register(Recipe)
+class RecipeAdmin(admin.ModelAdmin):
+    list_display = ('name', 'description', 'shape')
     search_fields = ('name',)
+
+@admin.register(RecipeIngredient)
+class RecipeIngredientAdmin(admin.ModelAdmin):
+    list_display = ('recipe', 'ingredient', 'quantity_in_grams')
+    list_filter = ('recipe', 'ingredient')
+    search_fields = ('recipe__name', 'ingredient__name')
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'product_type', 'sale_price', 'shape')
-    list_filter = ('product_type', 'shape')
-    search_fields = ('name',)
-
-@admin.register(Preparation)
-class PreparationAdmin(admin.ModelAdmin):
-    list_display = ('name', 'product')
-    list_filter = ('product',)
-    search_fields = ('name',)
+    list_display = ('product_type', 'sale_price', 'recipe')
+    list_filter = ('product_type', 'recipe')
+    search_fields = ('product_type',)
