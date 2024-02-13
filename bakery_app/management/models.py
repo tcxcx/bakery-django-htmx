@@ -65,8 +65,15 @@ class Product(models.Model):
         return cost_rounded
 
     @property
-    def calculate_margin(self):
+    def calculate_profit(self):
         total_cost = self.calculate_cost
         cost_rounded = round(total_cost, 2)
-        margin = self.sale_price - cost_rounded
-        return margin
+        profit = self.sale_price - cost_rounded
+        return round(profit, 1)
+
+
+    @property
+    def calculate_margin(self):
+        margin_percentage = (self.calculate_profit / self.sale_price) * 100
+        return round(margin_percentage, 1)
+
