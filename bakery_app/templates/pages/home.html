@@ -24,7 +24,7 @@
   <main class="col-span-12 md:col-span-8">
     {% if user.is_authenticated %}
     <div hx-get="{% url 'management:product-table' %}" hx-trigger="load" hx-target="div.table-container" hx-swap="outerHTML" hx-on-load="loadTable()"></div>
-    <div class="table-container"></div>
+    <div class="table-container "></div>
     {% endif %}
   </main>
   {% include 'management/suppliers/sidebar.html' %}

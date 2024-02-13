@@ -10,7 +10,7 @@
           class="w-6 mr-1 -mt-1"
           src="{% static 'images/cake.svg' %}"
         />
-        <span class="text-lg font-bold uppercase">Bakery App</span>
+        <span class="text-2xl font-bold uppercase font2 text-black">Bakery App</span>
       </a>
     </logo>
     <mobileicon class="md:hidden">
@@ -44,8 +44,8 @@
       class="flex items-center navitems flex-col md:flex-row gap-8 md:gap-0 justify-end h-full -translate-y-10 md:translate-y-0"
     >
       {% if user.is_authenticated %}
-      <li><a href="/">Home</a></li>
-      <li><a href="{% url 'account_logout' %}">Log Out</a></li>
+      <li><a href="/" class="font1 uppercase">Home</a></li>
+      <li><a href="{% url 'account_logout' %}" class="font1 uppercase">Log Out</a></li>
       <li class="relative">
 
       <li x-data="{ dropdownOpen: false }" class="relative">
@@ -58,13 +58,13 @@
           x-transition:enter-end="opacity-100 translate-y-0 scale-100"
         >
           <ul class="hoverlist [&>li>a]:justify-end">
-            <li><a href="{% url 'account_logout' %}">Log Out</a></li>
+            <li><a href="{% url 'account_logout' %}" class="font1 uppercase">Log Out</a></li>
           </ul>
         </div>
       </li>
       {% else %}
-      <li><a href="{% url 'account_login' %}">Log In</a></li>
-      <li><a href="{% url 'account_signup' %}">Sign Up</a></li>
+      <li><a href="{% url 'account_login' %}" class="font1 uppercase">Log In</a></li>
+      <li><a href="{% url 'account_signup' %}" class="font1 uppercase">Sign Up</a></li>
       {% endif %}
     </ul>
   </nav>

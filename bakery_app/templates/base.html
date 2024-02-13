@@ -15,6 +15,8 @@
     <meta name="description" content="App for recipe management " />
     <meta name="author" content="Joseph Hanna " />
     <link rel="icon" href="{% static 'images/favicons/favicon.ico' %}" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Lobster&display=swap" rel="stylesheet" />
+
     {% block css %}
       <!-- Your stuff: Third-party CSS libraries go here -->
       <!-- This file stores project-specific CSS -->
@@ -45,6 +47,9 @@
       --primary-hover: rgb(101, 189, 176);
       --black: #1f2937;
       --font1: "Open Sans", sans-serif;
+      --font2: "Lobster", sans-serif;
+      --font3: "Montserrat", sans-serif;
+
     }
     h1 {
       @apply text-4xl font-bold mb-4;
@@ -56,8 +61,11 @@
       @apply text-lg font-bold;
     }
     .font1 {
-      font-family: var(--font1);
+      font-family: var(--font3);
     }
+    .font2 {
+        font-family: var(--font2);
+      }
     .button,
     button,
     [type="submit"],

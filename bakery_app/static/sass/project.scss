@@ -7,7 +7,9 @@
 // Then add additional custom code here
 
 /* Table style */
-.table-container th.asc:after {
+.table-container
+
+th.asc:after {
     content: '\0000a0\0025b2';
     float: right;
 }

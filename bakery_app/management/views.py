@@ -7,8 +7,9 @@ from .models import Supplier, Ingredient, Recipe, Product
 from .tables import ProductTable
 from django_tables2 import SingleTableView
 from django.http import HttpResponse
-from .forms import SupplierForm, IngredientForm, RecipeForm, RecipeIngredientFormSet, ProductForm, RecipeIngredient
+from .forms import RecipeForm, RecipeIngredientForm, Recipe, RecipeIngredient, SupplierForm, ProductForm, IngredientForm
 from django.views import View
+from django.forms import inlineformset_factory
 
 # Supplier views
 class SupplierListView(ListView):
@@ -82,8 +83,16 @@ class RecipeListView(ListView):
     template_name = 'management/list.html'
     context_object_name = 'recipes'
 
+RecipeIngredientFormSet = inlineformset_factory(
+    Recipe, RecipeIngredient,
+    form=RecipeIngredientForm,
+    fields=['ingredient', 'quantity_in_grams'],
+    extra=3,
+    can_delete=True
+)
+
 class RecipeCreateView(View):
-    template_name = 'management/recipes/create_update.html'
+    template_name = 'management/suppliers/create_update.html'
 
     def get(self, request, *args, **kwargs):
         form = RecipeForm()
@@ -97,12 +106,12 @@ class RecipeCreateView(View):
             recipe = form.save()
             formset.instance = recipe
             formset.save()
-            return redirect('management:recipe-list')  # Adjust the redirect as necessary
+            return redirect('management:recipe-list')
         return render(request, self.template_name, {'form': form, 'formset': formset})
 
 
 class RecipeUpdateView(View):
-    template_name = 'management/recipes/create_update.html'
+    template_name = 'management/suppliers/create_update.html'
 
     def get(self, request, pk, *args, **kwargs):
         recipe = Recipe.objects.get(pk=pk)
@@ -119,6 +128,7 @@ class RecipeUpdateView(View):
             formset.save()
             return redirect('management:recipe-list')
         return render(request, self.template_name, {'form': form, 'formset': formset, 'recipe': recipe})
+
 # table view
 
 class ProductTableView(SingleTableView, View):
@@ -169,20 +179,26 @@ def add_product(request):
 def add_recipe(request):
     if request.method == "POST":
         form = RecipeForm(request.POST)
-        if form.is_valid():
+        formset = RecipeIngredientFormSet(request.POST)
+        if form.is_valid() and formset.is_valid():
             recipe = form.save()
+            formset.instance = recipe
+            formset.save()
             return HttpResponse(
                 status=204,
                 headers={
                     'HX-Trigger': json.dumps({
-                        "showMessage": f"{recipe.name} added."
+                        "showMessage": f"{recipe.name} added successfully."
                     })
                 })
     else:
         form = RecipeForm()
+        formset = RecipeIngredientFormSet(queryset=RecipeIngredient.objects.none())
     return render(request, 'management/suppliers/form_recipe.html', {
         'form': form,
+        'formset': formset,
     })
+
 
 def add_ingredient(request):
     if request.method == "POST":

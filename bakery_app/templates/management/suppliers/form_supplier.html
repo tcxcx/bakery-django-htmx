@@ -21,7 +21,10 @@
       {{ form.as_p }}
     </div>
     <div class="modal-footer justify-end">
-      <button type="submit" class="button">Submit</button>
+      <button type="submit" class="button"
+      href="{{ request.META.HTTP_REFERER }}"
+
+      >Submit</button>
       <a
         class="button secondaryAction ml-1"
         href="{{ request.META.HTTP_REFERER }}"
@@ -33,9 +36,9 @@
 <script>
   htmx.defineExtension('submit-form', (event) => {
     event.on('htmx:afterRequest', (xhr) => {
-      if (xhr.status === 200) {
+      if (xhr.status === 204) {
         const modal = new bootstrap.Modal(document.getElementById("modal"));
-        modal.hide();
+        return modal.hide();
       }
     });
   });
