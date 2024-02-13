@@ -1,6 +1,9 @@
 from django.contrib import admin
 from .models import Supplier, Ingredient, Recipe, RecipeIngredient, Product
 
+class RecipeIngredientInline(admin.TabularInline):
+    model = RecipeIngredient
+    extra = 1
 @admin.register(Supplier)
 class SupplierAdmin(admin.ModelAdmin):
     list_display = ('name', 'ruc', 'email', 'phone', 'address')
@@ -16,6 +19,7 @@ class IngredientAdmin(admin.ModelAdmin):
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('name', 'description', 'shape')
     search_fields = ('name',)
+    inlines = [RecipeIngredientInline,]
 
 @admin.register(RecipeIngredient)
 class RecipeIngredientAdmin(admin.ModelAdmin):

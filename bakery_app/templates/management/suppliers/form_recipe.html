@@ -20,12 +20,16 @@
     <div class="modal-body">
       {{ form.as_p }}
       <h6>Ingredients</h6>
-      {{ recipeingredient_formset.management_form }}
-      {% for form in recipeingredient_formset %}
-        <div class="ingredient-formset">
-          {{ form.as_p }}
-        </div>
-      {% endfor %}
+      <fieldset>
+        <legend>Ingredients</legend>
+        {{ formset.management_form }}
+        {% for form in formset %}
+          <div class="ingredient-formset">
+            {{ form.ingredient }}
+            {{ form.quantity_in_grams }}
+          </div>
+        {% endfor %}
+      </fieldset>
     </div>
     <div class="modal-footer justify-end">
       <button type="submit" class="button">Submit</button>

@@ -1,14 +1,18 @@
-<h1>Suppliers</h1>
-<button hx-get="/suppliers/new/" hx-target="#modal" hx-toggle="modal">Add New Supplier</button>
-<ul>
-    {% for supplier in suppliers %}
-    <li>
-        {{ supplier.name }}
-        <button hx-get="{% url 'edit_supplier' supplier.pk %}" hx-target="#modal" hx-toggle="modal">Edit</button>
-        <button hx-post="{% url 'delete_supplier' supplier.pk %}" hx-confirm="Are you sure?">Delete</button>
-    </li>
-    {% endfor %}
-</ul>
 
-
-
+{% block content %}
+<div class="container">
+    <h2>Recipes List</h2>
+    <ul>
+        {% for recipe in recipes %}
+        <li>
+            <strong>{{ recipe.name }}</strong> - {{ recipe.description }}
+            <a href="{% url 'management:recipe-update' recipe.pk %}">Edit</a> |
+            <a href="{% url 'management:recipe-delete' recipe.pk %}">Delete</a>
+        </li>
+        {% empty %}
+        <li>No recipes found.</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'management:recipe-create' %}">Add New Recipe</a>
+</div>
+{% endblock %}

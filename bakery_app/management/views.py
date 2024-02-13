@@ -7,7 +7,7 @@ from .models import Supplier, Ingredient, Recipe, Product
 from .tables import ProductTable
 from django_tables2 import SingleTableView
 from django.http import HttpResponse
-from .forms import SupplierForm, IngredientForm, RecipeForm, RecipeIngredientFormSet, ProductForm
+from .forms import SupplierForm, IngredientForm, RecipeForm, RecipeIngredientFormSet, ProductForm, RecipeIngredient
 from django.views import View
 
 # Supplier views
@@ -79,7 +79,7 @@ class ProductDeleteView(DeleteView):
 # Recipe views
 class RecipeListView(ListView):
     model = Recipe
-    template_name = 'management/recipes/list.html'
+    template_name = 'management/list.html'
     context_object_name = 'recipes'
 
 class RecipeCreateView(View):
@@ -87,7 +87,7 @@ class RecipeCreateView(View):
 
     def get(self, request, *args, **kwargs):
         form = RecipeForm()
-        formset = RecipeIngredientFormSet()
+        formset = RecipeIngredientFormSet(queryset=RecipeIngredient.objects.none())
         return render(request, self.template_name, {'form': form, 'formset': formset})
 
     def post(self, request, *args, **kwargs):
@@ -97,8 +97,9 @@ class RecipeCreateView(View):
             recipe = form.save()
             formset.instance = recipe
             formset.save()
-            return redirect('recipe-list')  # Update with your correct success URL
+            return redirect('management:recipe-list')  # Adjust the redirect as necessary
         return render(request, self.template_name, {'form': form, 'formset': formset})
+
 
 class RecipeUpdateView(View):
     template_name = 'management/recipes/create_update.html'
@@ -107,7 +108,7 @@ class RecipeUpdateView(View):
         recipe = Recipe.objects.get(pk=pk)
         form = RecipeForm(instance=recipe)
         formset = RecipeIngredientFormSet(instance=recipe)
-        return render(request, self.template_name, {'form': form, 'formset': formset, 'object': recipe})
+        return render(request, self.template_name, {'form': form, 'formset': formset, 'recipe': recipe})
 
     def post(self, request, pk, *args, **kwargs):
         recipe = Recipe.objects.get(pk=pk)
@@ -116,16 +117,9 @@ class RecipeUpdateView(View):
         if form.is_valid() and formset.is_valid():
             form.save()
             formset.save()
-            return redirect('recipe-list')  # Update with your correct success URL
-        return render(request, self.template_name, {'form': form, 'formset': formset, 'object': recipe})
-
-class RecipeDeleteView(DeleteView):
-    model = Recipe
-    template_name = 'management/recipes/delete_confirm.html'
-    success_url = reverse_lazy('recipe-list')
-
+            return redirect('management:recipe-list')
+        return render(request, self.template_name, {'form': form, 'formset': formset, 'recipe': recipe})
 # table view
-
 
 class ProductTableView(SingleTableView, View):
     model = Product
@@ -186,11 +180,11 @@ def add_recipe(request):
                 })
     else:
         form = RecipeForm()
-    return render(request, 'management/suppliers/form_supplier.html', {
+    return render(request, 'management/suppliers/form_recipe.html', {
         'form': form,
     })
 
-def add_supply(request):
+def add_ingredient(request):
     if request.method == "POST":
         form = IngredientForm(request.POST)
         if form.is_valid():
@@ -204,6 +198,6 @@ def add_supply(request):
                 })
     else:
         form = IngredientForm()
-    return render(request, 'management/suppliers/form_supply.html', {
+    return render(request, 'management/suppliers/form_ingredient.html', {
         'form': form,
     })

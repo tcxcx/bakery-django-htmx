@@ -3,9 +3,9 @@ from .views import (
     SupplierListView, SupplierCreateView, SupplierUpdateView, SupplierDeleteView,
     IngredientListView, IngredientCreateView, IngredientUpdateView, IngredientDeleteView,
     ProductListView, ProductCreateView, ProductUpdateView, ProductDeleteView,
-    RecipeListView, RecipeCreateView, RecipeUpdateView, RecipeDeleteView,
+    RecipeListView, RecipeCreateView, RecipeUpdateView,
     ProductTableView,
-    add_supplier, add_recipe, add_product,
+    add_supplier, add_recipe, add_product, add_ingredient
 )
 
 app_name = "management"
@@ -33,11 +33,12 @@ urlpatterns = [
     path('recipes/', RecipeListView.as_view(), name='recipe-list'),
     path('recipes/new/', RecipeCreateView.as_view(), name='recipe-create'),
     path('recipes/<int:pk>/update/', RecipeUpdateView.as_view(), name='recipe-update'),
-    path('recipes/<int:pk>/delete/', RecipeDeleteView.as_view(), name='recipe-delete'),
 
     # Modal and Table URLs
     path('add_supplier/', add_supplier, name='add_supplier'),
     path('add_product/', add_product, name='add_product'),
     path('add_recipe/', add_recipe, name='add_recipe'),
+    path('add_ingredient/', add_ingredient, name='add_ingredient'),
+
     path('product-table/', ProductTableView.as_view(), name='product-table'),
 ]
