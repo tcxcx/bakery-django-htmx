@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MinValueValidator, EmailValidator, RegexValidator
 from django.core.exceptions import ValidationError
 from django.db.models import Sum, F, DecimalField
 from decimal import Decimal
@@ -8,8 +9,8 @@ import uuid
 class Supplier(models.Model):
     name = models.CharField(max_length=255)
     ruc = models.CharField(max_length=13)
-    email = models.EmailField()
-    phone = models.CharField(max_length=20)
+    email = models.EmailField(validators=[EmailValidator()])
+    phone = models.CharField(max_length=20, validators=[RegexValidator(regex=r'^\+?1?\d{9,15}$')])
     address = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
     id = models.CharField(max_length=100, default=uuid.uuid4, unique=True, primary_key=True, editable=False)
@@ -20,7 +21,7 @@ class Supplier(models.Model):
 class Ingredient(models.Model):
     name = models.CharField(max_length=255)
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, null=True)
-    price_per_gram = models.DecimalField(max_digits=10, decimal_places=2)
+    price_per_gram = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal('0.01'))])
 
     def __str__(self):
         return self.name[:50]
@@ -43,7 +44,7 @@ class Recipe (models.Model):
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE, null=True)
-    quantity_in_grams = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity_in_grams = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal('0.01'))])
 
     def __str__(self):
         return f"{self.ingredient.name} in {self.quantity_in_grams:.2f}g for {self.recipe.name}"
