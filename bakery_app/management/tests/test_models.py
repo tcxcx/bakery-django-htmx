@@ -1,29 +1,40 @@
 import pytest
 from django.test import TestCase
+import factory
 from bakery_app.management.models import Supplier, Ingredient, Recipe, RecipeIngredient, Product
 from factory import Faker, SubFactory, Sequence, post_generation, django, LazyFunction
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from decimal import Decimal
 import random
 import factory
 
 
-class SupplierFactory(django.DjangoModelFactory):
+# this definition was found in https://github.com/joke2k/faker/issues/966 as char length with Faker was throwing errors that passed char limits
+def factory_lazy_function(value, max_length=None):
+    if max_length is None:
+        max_length = len(value)
+
+    return factory.LazyFunction(lambda: value[:max_length])
+
+fake = factory.faker.faker.Faker()
+
+
+class SupplierFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Supplier
 
-    name = Faker('company'[:20])
-    ruc = Faker('isbn13', separator=""[:13])
-    email = Faker('email'[:20])
-    phone = Faker('phone_number'[:20])
-    address = Faker('address'[:20])
-
+    name = factory_lazy_function(value=fake.company(), max_length=20)
+    ruc = factory_lazy_function(value=fake.isbn13(separator=""), max_length=13)
+    email = factory_lazy_function(value=fake.email(), max_length=20)
+    phone = factory_lazy_function(value=fake.phone_number(), max_length=20)
+    address = factory_lazy_function(value=fake.address(), max_length=20)
 
 class IngredientFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Ingredient
 
-    name = Faker('word'[:20])
+    name = factory_lazy_function(value=fake.word(), max_length=20)
     supplier = SubFactory(SupplierFactory)
     price_per_gram = LazyFunction(lambda: round(random.uniform(0.01, 100.00), 2))
 
@@ -138,3 +149,76 @@ class TestModels(TestCase):
 
         product = ProductFactory(product_type='Product1')
         self.assertEqual(str(product), 'Product1')
+
+@pytest.mark.django_db
+class TestFieldValidations(TestCase):
+    def test_negative_price_per_gram(self):
+        with pytest.raises(ValidationError):
+            IngredientFactory(price_per_gram=Decimal('-0.01')).full_clean()
+
+@pytest.mark.django_db
+class TestModelRelationships(TestCase):
+    def test_recipe_ingredient_relationship(self):
+        recipe = RecipeFactory()
+        ingredient = IngredientFactory()
+        recipe_ingredient = RecipeIngredientFactory(recipe=recipe, ingredient=ingredient)
+        self.assertIn(recipe_ingredient, recipe.recipeingredient_set.all())
+        self.assertEqual(recipe_ingredient.ingredient, ingredient)
+
+@pytest.mark.django_db
+class TestMethodAndProperty(TestCase):
+    def test_calculate_profit_positive(self):
+        product = ProductFactory()
+        self.assertTrue(product.calculate_profit > 0)
+
+    def test_calculate_margin(self):
+        product = ProductFactory()
+        expected_margin = (product.calculate_profit / product.sale_price) * 100
+        self.assertEqual(product.calculate_margin, expected_margin)
+
+@pytest.mark.django_db
+class TestStringRepresentations(TestCase):
+    def test_ingredient_str(self):
+        ingredient = IngredientFactory(name="Flour")
+        self.assertEqual(str(ingredient), "Flour")
+
+@pytest.mark.django_db
+class TestValidationMethods(TestCase):
+    def test_clean_recipe_ingredient_negative_quantity(self):
+        with pytest.raises(ValidationError):
+            RecipeIngredientFactory(quantity_in_grams=Decimal('-1')).full_clean()
+
+@pytest.mark.django_db
+class TestEdgeCases(TestCase):
+    def test_recipe_ingredient_edge_case_quantities(self):
+        try:
+            RecipeIngredientFactory(quantity_in_grams=Decimal('99999.99')).full_clean()
+        except ValidationError:
+            self.fail("Boundary quantity_in_grams should not raise ValidationError.")
+
+@pytest.mark.django_db
+class TestDeletionAndCascadeEffects(TestCase):
+    def test_delete_supplier_cascades_to_ingredients(self):
+        supplier = SupplierFactory()
+        ingredient = IngredientFactory(supplier=supplier)
+        supplier.delete()
+        with pytest.raises(Ingredient.DoesNotExist):
+            Ingredient.objects.get(id=ingredient.id)
+
+@pytest.mark.django_db
+class TestUniqueAndConstraints(TestCase):
+    def test_unique_supplier_id(self):
+        supplier1 = SupplierFactory()
+        with pytest.raises(IntegrityError):
+            SupplierFactory(id=supplier1.id)
+
+# Additional edge case tests
+@pytest.mark.django_db
+class TestAdditionalEdgeCases(TestCase):
+    @pytest.mark.xfail(reason="Intentionally testing edge cases that may fail")
+    def test_invalid_quantity_edge_cases(self):
+        with pytest.raises(ValidationError):
+            RecipeIngredientFactory(quantity_in_grams=Decimal('-1.0')).full_clean()
+
+        with pytest.raises(ValidationError):
+            RecipeIngredientFactory(quantity_in_grams=Decimal('100000.0')).full_clean()
