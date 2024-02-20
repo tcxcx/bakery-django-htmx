@@ -36,7 +36,7 @@ class Recipe (models.Model):
     ('R', 'Rectangular'),
     ]
     shape = models.CharField(max_length=1, choices=shape_options)
-    dimensions = models.JSONField()
+    dimensions = models.JSONField(blank=True, null=True)
 
     def __str__(self):
         return self.name

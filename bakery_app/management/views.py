@@ -14,73 +14,75 @@ from django.forms import inlineformset_factory
 # Supplier views
 class SupplierListView(ListView):
     model = Supplier
-    template_name = 'management/suppliers/form.html'
+    template_name = 'management/suppliers/list.html'
     context_object_name = 'suppliers'
 
 class SupplierCreateView(CreateView):
     model = Supplier
-    template_name = 'management/suppliers/form.html'
+    template_name = 'management/suppliers/create_update.html'
     fields = '__all__'
+    success_url = reverse_lazy('management:supplier-list')
 
 class SupplierUpdateView(UpdateView):
     model = Supplier
-    template_name = 'management/suppliers/form.html'
+    success_url = reverse_lazy('management:supplier-list')
     fields = '__all__'
 
 class SupplierDeleteView(DeleteView):
     model = Supplier
-    template_name = 'supplier_confirm_delete.html'
-    success_url = reverse_lazy('supplier-list')
+    template_name = 'list.html'
+    success_url = reverse_lazy('management:supplier-list')
 
 # Ingredient views (replacing Supply views)
 class IngredientListView(ListView):
     model = Ingredient
-    template_name = 'management/ingredients/list.html'
+    template_name = 'management/suppliers/list.html'
     context_object_name = 'ingredients'
 
 class IngredientCreateView(CreateView):
     model = Ingredient
-    form_class = IngredientForm  # Assuming you create an IngredientForm
-    template_name = 'management/ingredients/create_update.html'
+    form_class = IngredientForm
+    template_name = 'management/suppliers/create_update.html'
     success_url = reverse_lazy('management:ingredient-list')
 
 class IngredientUpdateView(UpdateView):
     model = Ingredient
     form_class = IngredientForm
-    template_name = 'management/ingredients/create_update.html'
+    template_name = 'management/suppliers/create_update.html'
     success_url = reverse_lazy('management:ingredient-list')
 
 class IngredientDeleteView(DeleteView):
     model = Ingredient
-    template_name = 'management/ingredients/delete_confirm.html'
+    template_name = 'management/suppliers/create_update.html'
     success_url = reverse_lazy('management:ingredient-list')
 
 
 # Product views
 class ProductListView(ListView):
     model = Product
-    template_name = 'product_list.html'
+    template_name = 'management/suppliers/form_product.html'
     context_object_name = 'products'
 
 class ProductCreateView(CreateView):
     model = Product
-    template_name = 'product_form.html'
+    template_name = 'management/suppliers/form_product.html'
     fields = '__all__'
+    success_url = reverse_lazy('management:product-list')
 
 class ProductUpdateView(UpdateView):
     model = Product
-    template_name = 'product_form.html'
+    template_name = 'management/suppliers/form_product.html'
     fields = '__all__'
 
 class ProductDeleteView(DeleteView):
     model = Product
-    template_name = 'product_confirm_delete.html'
-    success_url = reverse_lazy('product-list')
+    template_name = 'form_product.html'
+    success_url = reverse_lazy('management:product-list')
 
 # Recipe views
 class RecipeListView(ListView):
     model = Recipe
-    template_name = 'management/list.html'
+    template_name = 'management/suppliers/list.html'
     context_object_name = 'recipes'
 
 RecipeIngredientFormSet = inlineformset_factory(
@@ -106,7 +108,7 @@ class RecipeCreateView(View):
             recipe = form.save()
             formset.instance = recipe
             formset.save()
-            return redirect('management:recipe-list')
+            return redirect('management:product-list')
         return render(request, self.template_name, {'form': form, 'formset': formset})
 
 

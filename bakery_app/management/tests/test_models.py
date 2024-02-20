@@ -9,8 +9,8 @@ from decimal import Decimal
 import random
 import factory
 
-
 # this definition was found in https://github.com/joke2k/faker/issues/966 as char length with Faker was throwing errors that passed char limits
+
 def factory_lazy_function(value, max_length=None):
     if max_length is None:
         max_length = len(value)
@@ -18,7 +18,6 @@ def factory_lazy_function(value, max_length=None):
     return factory.LazyFunction(lambda: value[:max_length])
 
 fake = factory.faker.faker.Faker()
-
 
 class SupplierFactory(factory.django.DjangoModelFactory):
     class Meta:
@@ -63,8 +62,6 @@ class ProductFactory(factory.django.DjangoModelFactory):
     product_type = Sequence(lambda n: f'Test Product {n}')
     sale_price = Faker('pydecimal', left_digits=3, right_digits=2, positive=True)
     recipe = SubFactory(RecipeFactory)
-
-
 
 class TestModels(TestCase):
     @pytest.mark.xfail(reason="RUC can be longer than 13 characters with Faker data gen")
