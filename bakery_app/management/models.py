@@ -1,24 +1,47 @@
 from django.db import models
+from django.conf import settings
 from django.core.validators import MinValueValidator, EmailValidator, RegexValidator
 from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User
 from django.db.models import Sum, F, DecimalField
 from decimal import Decimal
+from django.utils.timezone import now
 
 import uuid
 
-class Supplier(models.Model):
+class AuditModel(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name="%(class)s_created",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name="%(class)s_updated",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    class Meta:
+        abstract = True
+
+class Supplier(AuditModel):
     name = models.CharField(max_length=255)
     ruc = models.CharField(max_length=13)
     email = models.EmailField(validators=[EmailValidator()])
     phone = models.CharField(max_length=20, validators=[RegexValidator(regex=r'^\+?1?\d{9,15}$')])
     address = models.TextField()
-    created = models.DateTimeField(auto_now_add=True)
     id = models.CharField(max_length=100, default=uuid.uuid4, unique=True, primary_key=True, editable=False)
 
     def __str__(self):
         return self.name
 
-class Ingredient(models.Model):
+class Ingredient(AuditModel):
     name = models.CharField(max_length=255)
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, null=True)
     price_per_gram = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal('0.01'))])
@@ -27,7 +50,7 @@ class Ingredient(models.Model):
         return self.name[:50]
 
 
-class Recipe (models.Model):
+class Recipe (AuditModel):
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=255)
     ingredients = models.ManyToManyField(Ingredient, through='RecipeIngredient')
@@ -36,15 +59,19 @@ class Recipe (models.Model):
     ('R', 'Rectangular'),
     ]
     shape = models.CharField(max_length=1, choices=shape_options)
-    dimensions = models.JSONField(blank=True, null=True)
+    diameter = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, validators=[MinValueValidator(Decimal('0.01'))])
+    height = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, validators=[MinValueValidator(Decimal('0.01'))])
+    length = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, validators=[MinValueValidator(Decimal('0.01'))])
+    width = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, validators=[MinValueValidator(Decimal('0.01'))])
 
     def __str__(self):
         return self.name
 
-class RecipeIngredient(models.Model):
+class RecipeIngredient(AuditModel):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE, null=True)
     quantity_in_grams = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal('0.01'))])
+
 
     def __str__(self):
         return f"{self.ingredient.name} in {self.quantity_in_grams:.2f}g for {self.recipe.name}"
@@ -66,6 +93,11 @@ class Product(models.Model):
     product_type = models.CharField(max_length=255)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2)
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, null=True)
+
+    # Audit fields
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     def __str__(self):
         return self.product_type
 

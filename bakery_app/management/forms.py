@@ -27,13 +27,17 @@ class IngredientForm(forms.ModelForm):
 class RecipeForm(forms.ModelForm):
     class Meta:
         model = Recipe
-        fields = ['name', 'description', 'shape', 'dimensions']
+        fields = ['name', 'description', 'shape', 'diameter', 'height', 'length', 'width']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control'}),
             'shape': forms.Select(attrs={'class': 'form-control'}),
-            'dimensions': forms.TextInput(attrs={'class': 'form-control'}),
+            'diameter': forms.NumberInput(attrs={'class': 'form-control', 'min': '0.01'}),
+            'height': forms.NumberInput(attrs={'class': 'form-control', 'min': '0.01'}),
+            'length': forms.NumberInput(attrs={'class': 'form-control', 'min': '0.01'}),
+            'width': forms.NumberInput(attrs={'class': 'form-control', 'min': '0.01'}),
         }
+
 
 class RecipeIngredientForm(forms.ModelForm):
     ingredient = ModelChoiceField(queryset=Ingredient.objects.all(), widget=forms.Select(attrs={'class': 'form-control'}))
