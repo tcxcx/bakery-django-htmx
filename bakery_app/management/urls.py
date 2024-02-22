@@ -4,7 +4,7 @@ from .views import (
     IngredientListView, IngredientCreateView, IngredientUpdateView, IngredientDeleteView,
     ProductListView, ProductCreateView, ProductUpdateView, ProductDeleteView,
     RecipeListView, RecipeCreateView, RecipeUpdateView,
-    ProductTableView, VariationsTableView,
+    ProductTableView, VariationsTableView, IngredientTableView,
     add_supplier, add_recipe, add_product, add_ingredient, product_list_view, add_product_variation
 )
 from . import views
@@ -44,10 +44,11 @@ urlpatterns = [
     path('add_product_variation/', add_product_variation, name='add_product_variation'),
 
 
-    path('product-table/', ProductTableView.as_view(), name='product-table'),
+    path('product/table/', ProductTableView.as_view(), name='product-table'),
+    path('ingredients/table/', IngredientTableView.as_view(), name='ingredient-table'),
+    path('variations/table/', VariationsTableView.as_view(), name='variations-table'),
     path('products/', product_list_view, name='product-list'),
     path('update_variation_form/<int:product_id>/', views.update_variation_form, name='update_variation_form'),
     path('get_product_shape/<int:product_id>/', views.get_product_shape, name='get_product_shape'),
-    path('variations-table/', VariationsTableView.as_view(), name='variations-table'),
 
 ]

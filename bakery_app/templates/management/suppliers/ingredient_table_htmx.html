@@ -6,15 +6,8 @@
 {% load crispy_forms_tags %}  {# If you're using django-crispy-forms for form rendering #}
 
 {% block content %}
-    <h1 class="text-base uppercase font1">Product Table</h1>
-    <div class="filter-form">
-        <form method="get" class="form-inline">
-            {{ filter.form.as_p }}
-            <button type="submit" class="btn btn-primary">Filter</button>
-        </form>
-    </div>
-
-
+    <h1 class="text-base uppercase font1">Ingredient Table</h1>
+<div id="ingredient-table"></div>
     <div class="table-container">
         {% render_table table %}
     </div>

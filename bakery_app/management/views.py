@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from .models import Supplier, Ingredient, Recipe, Product, ProductVariation
 from django.http import HttpResponse
-from .tables import ProductTable, ProductVariationTable
+from .tables import ProductTable, ProductVariationTable, IngredientTable
 from django.http import JsonResponse
 from django_tables2 import SingleTableView
 from django.http import HttpResponseRedirect
@@ -201,6 +201,13 @@ class ProductTableView(SingleTableMixin, FilterView):
     model = Product
     table_class = ProductTable
     template_name = 'management/suppliers/product_table_htmx.html'
+    filterset_class = ProductFilter
+    paginate_by = 10
+
+class IngredientTableView(SingleTableMixin, FilterView):
+    model = Ingredient
+    table_class = IngredientTable
+    template_name = 'management/suppliers/ingredient_table_htmx.html'
     filterset_class = ProductFilter
     paginate_by = 10
 

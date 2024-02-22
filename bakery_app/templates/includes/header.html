@@ -44,7 +44,9 @@
       class="flex items-center navitems flex-col md:flex-row gap-8 md:gap-0 justify-end h-full -translate-y-10 md:translate-y-0"
     >
       {% if user.is_authenticated %}
-      <li><a href="/" class="font1 uppercase">Home</a></li>
+      <li><a href="/" class="font1 uppercase">Product Tab</a></li>
+      <li><a href="/product-variations/" class="font1 uppercase">Product Variations Tab</a></li>
+      <li><a href="/ingredients/" class="font1 uppercase">Ingredient Tab</a></li>
       <li><a href="{% url 'account_logout' %}" class="font1 uppercase">Log Out</a></li>
       <li class="relative">
 
