@@ -50,18 +50,31 @@ class Ingredient(AuditModel):
         return self.name[:50]
 
 class Recipe(models.Model):
-    SHAPE_CHOICES = [('C', 'Circular'), ('R', 'Rectangular')]
-
+    SHAPE_CHOICES = [
+        ('C', 'Circular'),
+        ('R', 'Rectangular')
+    ]
     name = models.CharField(max_length=255)
     description = models.TextField()
     shape = models.CharField(max_length=1, choices=SHAPE_CHOICES)
     diameter = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
     length = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
     width = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
-    ingredients = models.ManyToManyField(Ingredient, through='RecipeIngredient')
+    ingredients = models.ManyToManyField('Ingredient', through='RecipeIngredient')
 
     def __str__(self):
         return self.name
+
+    def create_main_variation_for_product(self, product):
+        """Automatically creates a main variation for the product based on this recipe."""
+        ProductVariation.objects.create(
+            product=product,
+            diameter=self.diameter,
+            length=self.length,
+            width=self.width,
+            main_variation=True
+        )
+
 
 class RecipeIngredient(AuditModel):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
@@ -88,8 +101,13 @@ class RecipeIngredient(AuditModel):
 class Product(models.Model):
     product_type = models.CharField(max_length=255)
     sale_price = models.DecimalField(max_digits=10, decimal_places=2)
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, null=True)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name="products")
 
+    def save(self, *args, **kwargs):
+        is_new = self._state.adding
+        super().save(*args, **kwargs)
+        if is_new:
+            self.recipe.create_main_variation_for_product(self)
     # Audit fields
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -112,8 +130,6 @@ class Product(models.Model):
         profit = self.sale_price - cost_rounded
         return round(profit, 2)
 
-
-
     @property
     def calculate_margin(self):
         margin_percentage = (self.calculate_profit / self.sale_price) * 100
@@ -128,36 +144,38 @@ class ProductVariation(models.Model):
     main_variation = models.BooleanField(default=False)
 
     def calculate_surface_area(self):
-        """Calculates the surface area based on the product's shape."""
-        if self.product.recipe.shape == 'C' and self.diameter:
+        if self.product.recipe.shape == 'Circular' and self.diameter:
             radius = self.diameter / 2
-            return pi * (radius ** 2)
-        elif self.product.recipe.shape == 'R' and self.length and self.width:
-            return self.length * self.width
-        return 0
+            surface_area = pi * (radius ** 2)
+        elif self.product.recipe.shape == 'Rectangular' and self.length and self.width:
+            surface_area = self.length * self.width
+        else:
+            surface_area = 0
+        return surface_area
+
 
     def adjustment_factor(self):
-        """Calculates the adjustment factor based on the main variation's surface area."""
         main_variation = self.product.variations.filter(main_variation=True).first()
-        if main_variation and main_variation.calculate_surface_area() > 0:
-            return self.calculate_surface_area() / main_variation.calculate_surface_area()
+        if main_variation:
+            main_area = main_variation.calculate_surface_area()
+            this_area = self.calculate_surface_area()
+            if main_area > 0:
+                return this_area / main_area
         return 1
 
     @property
     def adjusted_cost(self):
-        """Calculates adjusted cost based on the variation's adjustment factor."""
         adjustment_factor = self.adjustment_factor()
-        return self.product.calculate_cost * adjustment_factor
+        return round(self.product.calculate_cost * adjustment_factor, 2)
 
     @property
     def adjusted_profit(self):
-        """Calculates profit based on adjusted cost and product's sale price."""
-        return self.product.sale_price - self.adjusted_cost
+        return round(self.product.sale_price - self.adjusted_cost, 2)
 
     @property
     def adjusted_margin(self):
         if self.product.sale_price > 0:
-            return (self.adjusted_profit / self.product.sale_price) * 100
+            return round((self.adjusted_profit / self.product.sale_price) * 100, 2)
         return 0
 
     def __str__(self):

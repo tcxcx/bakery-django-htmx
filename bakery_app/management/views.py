@@ -304,10 +304,16 @@ def add_product_variation(request):
         form = ProductVariationForm(request.POST)
         if form.is_valid():
             product_variation = form.save()
-            return HttpResponseRedirect('/')
+            return HttpResponse(
+                            status=204,
+                            headers={
+                                'HX-Trigger': json.dumps({
+                                    "showMessage": f"Product variation added."
+                                })
+                            })
     else:
         form = ProductVariationForm()
-    return render(request, 'management/suppliers/add_product_variation.html', {'form': form})
+    return render(request, 'management/suppliers/form_add_product_variation.html', {'form': form})
 
 
 def product_list_view(request):

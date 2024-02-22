@@ -78,6 +78,24 @@ class ProductForm(forms.ModelForm):
             'recipe': forms.Select(attrs={'class': 'form-control'}),
         }
 
+    def save(self, commit=True):
+        # Save the Product instance
+        product_instance = super(ProductForm, self).save(commit=False)
+        if commit:
+            product_instance.save()
+            # Assuming the Recipe instance is already linked to the Product
+            recipe_instance = product_instance.recipe
+            # Check if dimensions are provided in the Recipe and create main ProductVariation
+            if recipe_instance and (recipe_instance.diameter or (recipe_instance.length and recipe_instance.width)):
+                ProductVariation.objects.create(
+                    product=product_instance,
+                    diameter=recipe_instance.diameter,
+                    length=recipe_instance.length,
+                    width=recipe_instance.width,
+                    main_variation=True
+                )
+        return product_instance
+
 
 class ProductVariationForm(forms.ModelForm):
     class Meta:
