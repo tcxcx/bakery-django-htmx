@@ -1,0 +1,25 @@
+{% extends "base.html" %} {% block content %}
+<div class="product-details">
+  <!-- Product details -->
+  <h2>{{ product.product_type }}</h2>
+
+  <!-- Variations and their adjusted supplies -->
+  {% for variation in variations %}
+  <div>
+    <h4>Variation: {{ variation }}</h4>
+    <p>Adjusted Supplies:</p>
+    <ul>
+      {% for supply in variation.adjusted_supplies %}
+      <li>
+        {{ supply.ingredient.name }}: {{ supply.adjusted_quantity }} grams
+      </li>
+      {% endfor %}
+    </ul>
+    <p>Sale Price: {{ variation.product.sale_price }}</p>
+    <p>Adjusted Cost: {{ variation.adjusted_cost }}</p>
+    <p>Profit: {{ variation.profit }}</p>
+    <p>Margin: {{ variation.margin }}%</p>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

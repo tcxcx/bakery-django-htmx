@@ -1,0 +1,5 @@
+{% if record.product.recipe.shape == 'C' %}
+Diameter: {{ record.diameter }} cm
+{% elif record.product.recipe.shape == 'R' %}
+Length: {{ record.length }} cm, Width: {{ record.width }} cm
+{% endif %}

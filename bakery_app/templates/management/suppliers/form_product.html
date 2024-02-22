@@ -3,7 +3,9 @@
   <form hx-post="{{ request.path }}" class="modal-content px-4">
     {% csrf_token %}
     <div class="modal-header">
-      <h5 class="modal-title">Add a New Product</h5>
+      <h5 class="modal-title">
+        {% if object %}Edit Product{% else %}Add a New Product{% endif %}
+      </h5>
     </div>
     <div class="flex items-center mb-6">
       <img
@@ -18,7 +20,17 @@
       >
     </div>
     <div class="modal-body">
+      <!-- Product Main Form -->
       {{ form.as_p }}
+      <!-- Product Variations -->
+      <hr>
+      <h6>Product Variations</h6>
+      {{ variations_formset.management_form }}
+      {% for form in variations_formset.forms %}
+        <div class="variation-form">
+          {{ form.as_p }}
+        </div>
+      {% endfor %}
     </div>
     <div class="modal-footer justify-end">
       <button type="submit" class="button">Submit</button>
@@ -30,6 +42,8 @@
     </div>
   </form>
 </div>
+{% endblock %}
+
 <script>
   htmx.defineExtension('submit-form', (event) => {
     event.on('htmx:afterRequest', (xhr) => {
@@ -40,4 +54,19 @@
     });
   });
 </script>
-{% endblock %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      const addVariationBtn = document.getElementById('add-variation');
+      const formsetContainer = document.getElementById('formset-container');
+      const totalForms = document.querySelector('input[name$="-TOTAL_FORMS"]');
+
+      addVariationBtn.addEventListener('click', function() {
+          const newForm = formsetContainer.children[0].cloneNode(true);
+          const formRegex = RegExp(`id_${variations_formset.prefix}-\\d+-`, 'g');
+
+          newForm.innerHTML = newForm.innerHTML.replace(formRegex, `id_${variations_formset.prefix}-${totalForms.value}-`);
+          totalForms.value = parseInt(totalForms.value) + 1;
+          formsetContainer.appendChild(newForm);
+      });
+  });
+  </script>

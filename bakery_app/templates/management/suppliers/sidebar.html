@@ -64,5 +64,19 @@
         </a>
       </li>
     </ul>
+    <h2 class="font2">Step 5</h2>
+    <ul class="hoverlist">
+      <li>
+        <a
+          hx-get="{% url 'management:add_product_variation' %}"
+          hx-target="#dialog"
+          hx-trigger-click
+          hx-swap="outerHTML"
+          hx-indicator=".progress"
+        >
+          <span class="font-bold text-base font1 uppercase">Add a Product Variation</span>
+        </a>
+      </li>
+    </ul>
   </section>
 </aside>

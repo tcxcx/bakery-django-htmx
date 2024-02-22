@@ -4,9 +4,11 @@ from .views import (
     IngredientListView, IngredientCreateView, IngredientUpdateView, IngredientDeleteView,
     ProductListView, ProductCreateView, ProductUpdateView, ProductDeleteView,
     RecipeListView, RecipeCreateView, RecipeUpdateView,
-    ProductTableView,
-    add_supplier, add_recipe, add_product, add_ingredient
+    ProductTableView, VariationsTableView,
+    add_supplier, add_recipe, add_product, add_ingredient, product_list_view, add_product_variation
 )
+from . import views
+
 
 app_name = "management"
 
@@ -39,6 +41,13 @@ urlpatterns = [
     path('add_product/', add_product, name='add_product'),
     path('add_recipe/', add_recipe, name='add_recipe'),
     path('add_ingredient/', add_ingredient, name='add_ingredient'),
+    path('add_product_variation/', add_product_variation, name='add_product_variation'),
+
 
     path('product-table/', ProductTableView.as_view(), name='product-table'),
+    path('products/', product_list_view, name='product-list'),
+    path('update_variation_form/<int:product_id>/', views.update_variation_form, name='update_variation_form'),
+    path('get_product_shape/<int:product_id>/', views.get_product_shape, name='get_product_shape'),
+    path('variations-table/', VariationsTableView.as_view(), name='variations-table'),
+
 ]

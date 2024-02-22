@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import inlineformset_factory, ModelChoiceField
-from .models import Supplier, Ingredient, Recipe, RecipeIngredient, Product
+from .models import Supplier, Ingredient, Recipe, RecipeIngredient, Product, ProductVariation
 
 class SupplierForm(forms.ModelForm):
     class Meta:
@@ -27,17 +27,12 @@ class IngredientForm(forms.ModelForm):
 class RecipeForm(forms.ModelForm):
     class Meta:
         model = Recipe
-        fields = ['name', 'description', 'shape', 'diameter', 'height', 'length', 'width']
+        fields = ['name', 'description', 'shape']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control'}),
             'shape': forms.Select(attrs={'class': 'form-control'}),
-            'diameter': forms.NumberInput(attrs={'class': 'form-control', 'min': '0.01'}),
-            'height': forms.NumberInput(attrs={'class': 'form-control', 'min': '0.01'}),
-            'length': forms.NumberInput(attrs={'class': 'form-control', 'min': '0.01'}),
-            'width': forms.NumberInput(attrs={'class': 'form-control', 'min': '0.01'}),
         }
-
 
 class RecipeIngredientForm(forms.ModelForm):
     ingredient = ModelChoiceField(queryset=Ingredient.objects.all(), widget=forms.Select(attrs={'class': 'form-control'}))
@@ -55,6 +50,7 @@ RecipeIngredientFormSet = inlineformset_factory(
     can_delete=True
 )
 
+
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
@@ -64,3 +60,18 @@ class ProductForm(forms.ModelForm):
             'sale_price': forms.NumberInput(attrs={'class': 'form-control'}),
             'recipe': forms.Select(attrs={'class': 'form-control'}),
         }
+
+
+class ProductVariationForm(forms.ModelForm):
+    class Meta:
+        model = ProductVariation
+        fields = ['product', 'diameter', 'length', 'width', 'main_variation']
+        widgets = {
+            'product': forms.Select(attrs={'class': 'form-control', 'onchange': 'updateFormFields();'}),
+            'diameter': forms.NumberInput(attrs={'class': 'form-control'}),
+            'length': forms.NumberInput(attrs={'class': 'form-control'}),
+            'width': forms.NumberInput(attrs={'class': 'form-control'}),
+            'main_variation': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+ProductVariationFormSet = inlineformset_factory(Product, ProductVariation, form=ProductVariationForm, extra=1, can_delete=True)

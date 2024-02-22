@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.db.models import Sum, F, DecimalField
 from decimal import Decimal
 from django.utils.timezone import now
-
+from math import pi
 import uuid
 
 class AuditModel(models.Model):
@@ -54,15 +54,7 @@ class Recipe (AuditModel):
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=255)
     ingredients = models.ManyToManyField(Ingredient, through='RecipeIngredient')
-    shape_options = [
-    ('C', 'Circular'),
-    ('R', 'Rectangular'),
-    ]
-    shape = models.CharField(max_length=1, choices=shape_options)
-    diameter = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, validators=[MinValueValidator(Decimal('0.01'))])
-    height = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, validators=[MinValueValidator(Decimal('0.01'))])
-    length = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, validators=[MinValueValidator(Decimal('0.01'))])
-    width = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, validators=[MinValueValidator(Decimal('0.01'))])
+    shape = models.CharField(max_length=1, choices=[('C', 'Circular'), ('R', 'Rectangular')])
 
     def __str__(self):
         return self.name
@@ -123,3 +115,54 @@ class Product(models.Model):
         margin_percentage = (self.calculate_profit / self.sale_price) * 100
         return round(margin_percentage, 2)
 
+
+class ProductVariation(models.Model):
+    product = models.ForeignKey(Product, related_name='variations', on_delete=models.CASCADE)
+    diameter = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    length = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    width = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    main_variation = models.BooleanField(default=False)
+
+    def calculate_surface_area(self):
+        if self.product.recipe.shape == 'C':
+            radius = self.diameter / 2
+            return pi * (radius ** 2)
+        elif self.product.recipe.shape == 'R':
+            return self.length * self.width
+        return 0
+
+    def supplies_adjustment_factor(self, main_variation):
+        main_area = main_variation.calculate_surface_area()
+        this_area = self.calculate_surface_area()
+        return this_area / main_area if main_area else 0
+
+    def __str__(self):
+        return f"{self.product.name} Variation ({'main' if self.main_variation else 'secondary'})"
+
+    def get_adjusted_supplies(self):
+            if not self.main_variation:
+                main_variation = self.product.variations.get(main_variation=True)
+                adjustment_factor = self.supplies_adjustment_factor(main_variation)
+                adjusted_supplies = []
+                for ingredient in self.product.recipe.recipeingredient_set.all():
+                    adjusted_quantity = ingredient.quantity_in_grams * adjustment_factor
+                    adjusted_supplies.append({'ingredient': ingredient.ingredient, 'adjusted_quantity': adjusted_quantity})
+                return adjusted_supplies
+            return [{'ingredient': ri.ingredient, 'quantity_in_grams': ri.quantity_in_grams} for ri in self.product.recipe.recipeingredient_set.all()]
+
+    def calculate_adjusted_cost(self):
+        main_variation = self.product.variations.get(main_variation=True)
+        adjustment_factor = self.supplies_adjustment_factor(main_variation)
+        total_cost = sum(
+            ingredient.quantity_in_grams * ingredient.ingredient.price_per_gram * adjustment_factor
+            for ingredient in self.product.recipe.recipeingredient_set.all()
+        )
+        return round(total_cost, 2)
+
+    def calculate_profit(self):
+        adjusted_cost = self.calculate_adjusted_cost()
+        return round(self.product.sale_price - adjusted_cost, 2)
+
+    def calculate_margin(self):
+        profit = self.calculate_profit()
+        return round((profit / self.product.sale_price) * 100, 2)

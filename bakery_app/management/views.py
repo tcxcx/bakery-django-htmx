@@ -1,15 +1,24 @@
 import json
-
+from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.shortcuts import render, redirect
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from .models import Supplier, Ingredient, Recipe, Product
-from .tables import ProductTable
-from django_tables2 import SingleTableView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
+from .models import Supplier, Ingredient, Recipe, Product, ProductVariation
 from django.http import HttpResponse
-from .forms import RecipeForm, RecipeIngredientForm, Recipe, RecipeIngredient, SupplierForm, ProductForm, IngredientForm
+from .tables import ProductTable, ProductVariationTable
+from django.http import JsonResponse
+from django_tables2 import SingleTableView
+from django.http import HttpResponseRedirect
+from django_tables2.views import SingleTableMixin
+from django_filters.views import FilterView
+from .filters import ProductFilter
+from django.http import HttpResponse
+from .forms import RecipeForm, RecipeIngredientForm, Recipe, RecipeIngredient, SupplierForm, ProductForm, IngredientForm, ProductVariationForm
 from django.views import View
+from django.shortcuts import get_object_or_404
 from django.forms import inlineformset_factory
+from .forms import ProductVariationFormSet
+from django.template.loader import render_to_string
 
 # Supplier views
 class SupplierListView(ListView):
@@ -67,12 +76,67 @@ class ProductCreateView(CreateView):
     model = Product
     template_name = 'management/suppliers/form_product.html'
     fields = '__all__'
-    success_url = reverse_lazy('management:product-list')
+    def get_context_data(self, **kwargs):
+            context = super().get_context_data(**kwargs)
+            if self.request.POST:
+                context['variations_formset'] = ProductVariationFormSet(self.request.POST)
+            else:
+                context['variations_formset'] = ProductVariationFormSet()
+            return context
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        variations_formset = context['variations_formset']
+        if variations_formset.is_valid():
+            self.object = form.save()
+            variations_formset.instance = self.object
+            variations_formset.save()
+            return redirect(self.get_success_url())
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
+
 
 class ProductUpdateView(UpdateView):
     model = Product
+    form_class = ProductForm
     template_name = 'management/suppliers/form_product.html'
-    fields = '__all__'
+    success_url = reverse_lazy('management:product-list')
+
+    def get_context_data(self, **kwargs):
+        context = super(ProductUpdateView, self).get_context_data(**kwargs)
+        if self.request.POST:
+            context['variations_formset'] = ProductVariationFormSet(self.request.POST, self.request.FILES, instance=self.object)
+        else:
+            context['variations_formset'] = ProductVariationFormSet(instance=self.object)
+        return context
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        variations_formset = context['variations_formset']
+        if variations_formset.is_valid():
+            response = super(ProductUpdateView, self).form_valid(form)
+            variations_formset.instance = self.object
+            variations_formset.save()
+            return response
+        else:
+            return self.render_to_response(self.get_context_data(form=form))
+
+class ProductDetailView(DetailView):
+    model = Product
+    template_name = 'product_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        product = context['product']
+        variations = product.variations.all()
+        for variation in variations:
+            variation.adjusted_supplies = variation.get_adjusted_supplies()
+            variation.adjusted_cost = variation.calculate_adjusted_cost()
+            variation.profit = variation.calculate_profit()
+            variation.margin = variation.calculate_margin()
+        context['variations'] = variations
+        return context
+
 
 class ProductDeleteView(DeleteView):
     model = Product
@@ -133,10 +197,18 @@ class RecipeUpdateView(View):
 
 # table view
 
-class ProductTableView(SingleTableView, View):
+class ProductTableView(SingleTableMixin, FilterView):
     model = Product
     table_class = ProductTable
     template_name = 'management/suppliers/product_table_htmx.html'
+    filterset_class = ProductFilter
+    paginate_by = 10
+
+class VariationsTableView(SingleTableMixin, FilterView):
+    model = ProductVariation
+    table_class = ProductVariationTable
+    template_name = 'management/suppliers/variations_table.html'
+
 
 # modals
 def add_supplier(request):
@@ -168,7 +240,7 @@ def add_product(request):
                 status=204,
                 headers={
                     'HX-Trigger': json.dumps({
-                        "showMessage": f"{product.name} added."
+                        "showMessage": f"{product.product_type} added."
                     })
                 })
     else:
@@ -219,3 +291,35 @@ def add_ingredient(request):
     return render(request, 'management/suppliers/form_ingredient.html', {
         'form': form,
     })
+
+def add_product_variation(request):
+    if request.method == 'POST':
+        form = ProductVariationForm(request.POST)
+        if form.is_valid():
+            product_variation = form.save()
+            return HttpResponseRedirect('/')
+    else:
+        form = ProductVariationForm()
+    return render(request, 'management/suppliers/add_product_variation.html', {'form': form})
+
+
+def product_list_view(request):
+    filter = ProductFilter(request.GET, queryset=Product.objects.all())
+    table = ProductTable(filter.qs)
+    table.paginate(page=request.GET.get("page", 1), per_page=10)
+
+    if request.htmx:
+        return render(request, 'management/suppliers/product_table_partial.html', {'table': table})
+    else:
+        return render(request, 'management/suppliers/product_table_htmx.html', {'table': table, 'filter': filter})
+
+def update_variation_form(request, product_id):
+    product = Product.objects.get(pk=product_id)
+    return JsonResponse({
+        'shape': product.recipe.shape
+    })
+
+def get_product_shape(request, product_id):
+    product = Product.objects.get(pk=product_id)
+    shape = product.recipe.shape
+    return JsonResponse({'shape': shape})
