@@ -98,15 +98,22 @@ class ProductForm(forms.ModelForm):
 
 
 class ProductVariationForm(forms.ModelForm):
+
     class Meta:
         model = ProductVariation
-        fields = ['product', 'diameter', 'length', 'width', 'main_variation']
+        fields = ['product', 'diameter', 'length', 'width']
         widgets = {
             'product': forms.Select(attrs={'class': 'form-control', 'onchange': 'updateFormFields();'}),
             'diameter': forms.NumberInput(attrs={'class': 'form-control'}),
             'length': forms.NumberInput(attrs={'class': 'form-control'}),
             'width': forms.NumberInput(attrs={'class': 'form-control'}),
-            'main_variation': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
+    def save(self, commit=True):
+        instance = super(ProductVariationForm, self).save(commit=False)
+        if instance.main_variation:
+            ProductVariation.objects.filter(product=instance.product).update(main_variation=False)
+        if commit:
+            instance.save()
+        return instance
 
 ProductVariationFormSet = inlineformset_factory(Product, ProductVariation, form=ProductVariationForm, extra=1, can_delete=True)

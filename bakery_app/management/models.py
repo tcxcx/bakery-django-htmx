@@ -6,8 +6,11 @@ from django.contrib.auth.models import User
 from django.db.models import Sum, F, DecimalField
 from decimal import Decimal
 from django.utils.timezone import now
-from math import pi
+from math import pi as math_pi
 import uuid
+
+
+pi = Decimal(math_pi)
 
 class AuditModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -66,7 +69,6 @@ class Recipe(models.Model):
         return self.name
 
     def create_main_variation_for_product(self, product):
-        """Automatically creates a main variation for the product based on this recipe."""
         ProductVariation.objects.create(
             product=product,
             diameter=self.diameter,
@@ -145,23 +147,24 @@ class ProductVariation(models.Model):
 
     def calculate_surface_area(self):
         if self.product.recipe.shape == 'Circular' and self.diameter:
-            radius = self.diameter / 2
+            radius = self.diameter / Decimal('2.0')
             surface_area = pi * (radius ** 2)
         elif self.product.recipe.shape == 'Rectangular' and self.length and self.width:
             surface_area = self.length * self.width
         else:
-            surface_area = 0
-        return surface_area
+            surface_area = Decimal('0.0')
+        return Decimal(surface_area).quantize(Decimal('.01'))
 
 
     def adjustment_factor(self):
+        """Calculate the adjustment factor compared to the main variation."""
         main_variation = self.product.variations.filter(main_variation=True).first()
-        if main_variation:
+        if main_variation and self != main_variation:
             main_area = main_variation.calculate_surface_area()
             this_area = self.calculate_surface_area()
-            if main_area > 0:
-                return this_area / main_area
-        return 1
+            if main_area > Decimal('0'):
+                return (this_area / main_area).quantize(Decimal('.01'))
+        return Decimal('1.00')
 
     @property
     def adjusted_cost(self):

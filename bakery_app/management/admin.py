@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Supplier, Ingredient, Recipe, RecipeIngredient, Product
+from .models import Supplier, Ingredient, Recipe, RecipeIngredient, Product, ProductVariation
 
 class RecipeIngredientInline(admin.TabularInline):
     model = RecipeIngredient
@@ -32,3 +32,9 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = ('product_type', 'sale_price', 'recipe')
     list_filter = ('product_type', 'recipe')
     search_fields = ('product_type',)
+
+@admin.register(ProductVariation)
+class ProductVariationAdmin(admin.ModelAdmin):
+    list_display = ('product', 'diameter', 'length', 'width', 'main_variation')
+    list_filter = ('product', 'main_variation')
+    search_fields = ('product__product_type',)

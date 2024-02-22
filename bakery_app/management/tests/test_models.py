@@ -1,7 +1,7 @@
 import pytest
 from django.test import TestCase
 import factory
-from bakery_app.management.models import Supplier, Ingredient, Recipe, RecipeIngredient, Product
+from bakery_app.management.models import Supplier, Ingredient, Recipe, RecipeIngredient, Product, ProductVariation
 from factory import Faker, SubFactory, Sequence, post_generation, django, LazyFunction
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
@@ -45,7 +45,7 @@ class RecipeFactory(factory.django.DjangoModelFactory):
     name = Sequence(lambda n: f'Test Recipe {n}')
     description = Faker('sentence')
     shape = 'C'
-    dimensions = {'diameter': 10}
+    diameter = Faker('pydecimal', left_digits=2, right_digits=2, positive=True)
 
 class RecipeIngredientFactory(factory.django.DjangoModelFactory):
     class Meta:
@@ -62,6 +62,15 @@ class ProductFactory(factory.django.DjangoModelFactory):
     product_type = Sequence(lambda n: f'Test Product {n}')
     sale_price = Faker('pydecimal', left_digits=3, right_digits=2, positive=True)
     recipe = SubFactory(RecipeFactory)
+
+
+class ProductVariationFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = ProductVariation
+
+    product = SubFactory(ProductFactory)
+    diameter = Faker('pydecimal', left_digits=2, right_digits=2, positive=True)
+
 
 class TestModels(TestCase):
     @pytest.mark.xfail(reason="RUC can be longer than 13 characters with Faker data gen")
@@ -88,7 +97,6 @@ class TestModels(TestCase):
         self.assertEqual(saved_recipe.name, recipe.name)
         self.assertEqual(saved_recipe.description, recipe.description)
         self.assertEqual(saved_recipe.shape, recipe.shape)
-        self.assertEqual(saved_recipe.dimensions, recipe.dimensions)
 
     def test_recipe_ingredient_creation(self):
         recipe_ingredient = RecipeIngredientFactory()
@@ -219,3 +227,77 @@ class TestAdditionalEdgeCases(TestCase):
 
         with pytest.raises(ValidationError):
             RecipeIngredientFactory(quantity_in_grams=Decimal('100000.0')).full_clean()
+
+
+class ProductVariationFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = ProductVariation
+
+    product = SubFactory(ProductFactory)
+    diameter = Faker('pydecimal', left_digits=2, right_digits=2, positive=True)
+    main_variation = True  # Assuming main_variation needs to be set for tests
+
+# Assuming other factories (SupplierFactory, IngredientFactory, RecipeFactory, ProductFactory) are defined above
+
+@pytest.mark.django_db
+class TestProductVariationModels(TestCase):
+    def setUp(self):
+        self.supplier = SupplierFactory()
+        self.ingredient = IngredientFactory(supplier=self.supplier)
+        self.recipe = RecipeFactory()
+        self.product = ProductFactory(recipe=self.recipe)
+        self.product_variation = ProductVariationFactory(product=self.product, diameter=Decimal('10.0'), main_variation=True)
+
+    def test_product_variation_creation(self):
+        """Test the basic creation of a ProductVariation instance."""
+        self.assertIsNotNone(self.product_variation.pk)
+        self.assertEqual(self.product_variation.product, self.product)
+        self.assertTrue(self.product_variation.main_variation)
+
+    def test_calculate_surface_area_circular(self):
+        """Ensure circular surface area is calculated correctly."""
+        self.product.recipe.shape = 'Circular'
+        self.product_variation.diameter = Decimal('10.0')
+        self.product_variation.save()
+        expected_area = Decimal('78.54')  # Approximation for πr² with r = 5.0
+        calculated_area = self.product_variation.calculate_surface_area()
+        self.assertAlmostEqual(calculated_area, expected_area, places=2)
+
+    def test_calculate_surface_area_rectangular(self):
+        """Ensure rectangular surface area is calculated correctly."""
+        self.product.recipe.shape = 'Rectangular'
+        self.product_variation.length = Decimal('10.0')
+        self.product_variation.width = Decimal('5.0')
+        self.product_variation.save()
+        expected_area = Decimal('50.00')  # length × width
+        calculated_area = self.product_variation.calculate_surface_area()
+        self.assertAlmostEqual(calculated_area, expected_area, places=2)
+
+    def test_adjustment_factor(self):
+        # Assuming the main variation is correctly set up with a larger area
+        # and a secondary variation is created with a smaller area
+        main_variation_area = self.product_variation.calculate_surface_area()
+        secondary_variation = ProductVariationFactory(product=self.product, diameter=Decimal('5.0'), main_variation=False)
+        secondary_variation_area = secondary_variation.calculate_surface_area()
+
+        # Calculate the expected adjustment factor based on areas
+        expected_adjustment = secondary_variation_area / main_variation_area
+        calculated_adjustment = secondary_variation.adjustment_factor()
+
+        self.assertAlmostEqual(calculated_adjustment, expected_adjustment, places=2, msg=f"Expected adjustment factor {expected_adjustment} but got {calculated_adjustment}")
+
+
+    def test_adjusted_cost(self):
+        """Test the adjusted cost calculation."""
+        self.product.recipe.recipeingredient_set.create(ingredient=self.ingredient, quantity_in_grams=Decimal('100.00'))
+        expected_cost = self.product.calculate_cost  # Simplified; assumes cost calculation is correct
+        self.assertEqual(self.product_variation.adjusted_cost, expected_cost)
+
+    def test_adjusted_profit_and_margin(self):
+        """Test the adjusted profit and margin calculations."""
+        self.product.sale_price = Decimal('200.00')
+        self.product.recipe.recipeingredient_set.create(ingredient=self.ingredient, quantity_in_grams=Decimal('100.00'))
+        expected_profit = self.product.sale_price - self.product_variation.adjusted_cost
+        expected_margin = (expected_profit / self.product.sale_price) * 100
+        self.assertEqual(self.product_variation.adjusted_profit, expected_profit)
+        self.assertAlmostEqual(self.product_variation.adjusted_margin, expected_margin, places=2)
