@@ -49,12 +49,16 @@ class Ingredient(AuditModel):
     def __str__(self):
         return self.name[:50]
 
+class Recipe(models.Model):
+    SHAPE_CHOICES = [('C', 'Circular'), ('R', 'Rectangular')]
 
-class Recipe (AuditModel):
     name = models.CharField(max_length=255)
-    description = models.CharField(max_length=255)
+    description = models.TextField()
+    shape = models.CharField(max_length=1, choices=SHAPE_CHOICES)
+    diameter = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    length = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    width = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
     ingredients = models.ManyToManyField(Ingredient, through='RecipeIngredient')
-    shape = models.CharField(max_length=1, choices=[('C', 'Circular'), ('R', 'Rectangular')])
 
     def __str__(self):
         return self.name
@@ -124,45 +128,37 @@ class ProductVariation(models.Model):
     main_variation = models.BooleanField(default=False)
 
     def calculate_surface_area(self):
-        if self.product.recipe.shape == 'C':
+        """Calculates the surface area based on the product's shape."""
+        if self.product.recipe.shape == 'C' and self.diameter:
             radius = self.diameter / 2
             return pi * (radius ** 2)
-        elif self.product.recipe.shape == 'R':
+        elif self.product.recipe.shape == 'R' and self.length and self.width:
             return self.length * self.width
         return 0
 
-    def supplies_adjustment_factor(self, main_variation):
-        main_area = main_variation.calculate_surface_area()
-        this_area = self.calculate_surface_area()
-        return this_area / main_area if main_area else 0
+    def adjustment_factor(self):
+        """Calculates the adjustment factor based on the main variation's surface area."""
+        main_variation = self.product.variations.filter(main_variation=True).first()
+        if main_variation and main_variation.calculate_surface_area() > 0:
+            return self.calculate_surface_area() / main_variation.calculate_surface_area()
+        return 1
+
+    @property
+    def adjusted_cost(self):
+        """Calculates adjusted cost based on the variation's adjustment factor."""
+        adjustment_factor = self.adjustment_factor()
+        return self.product.calculate_cost * adjustment_factor
+
+    @property
+    def adjusted_profit(self):
+        """Calculates profit based on adjusted cost and product's sale price."""
+        return self.product.sale_price - self.adjusted_cost
+
+    @property
+    def adjusted_margin(self):
+        if self.product.sale_price > 0:
+            return (self.adjusted_profit / self.product.sale_price) * 100
+        return 0
 
     def __str__(self):
-        return f"{self.product.name} Variation ({'main' if self.main_variation else 'secondary'})"
-
-    def get_adjusted_supplies(self):
-            if not self.main_variation:
-                main_variation = self.product.variations.get(main_variation=True)
-                adjustment_factor = self.supplies_adjustment_factor(main_variation)
-                adjusted_supplies = []
-                for ingredient in self.product.recipe.recipeingredient_set.all():
-                    adjusted_quantity = ingredient.quantity_in_grams * adjustment_factor
-                    adjusted_supplies.append({'ingredient': ingredient.ingredient, 'adjusted_quantity': adjusted_quantity})
-                return adjusted_supplies
-            return [{'ingredient': ri.ingredient, 'quantity_in_grams': ri.quantity_in_grams} for ri in self.product.recipe.recipeingredient_set.all()]
-
-    def calculate_adjusted_cost(self):
-        main_variation = self.product.variations.get(main_variation=True)
-        adjustment_factor = self.supplies_adjustment_factor(main_variation)
-        total_cost = sum(
-            ingredient.quantity_in_grams * ingredient.ingredient.price_per_gram * adjustment_factor
-            for ingredient in self.product.recipe.recipeingredient_set.all()
-        )
-        return round(total_cost, 2)
-
-    def calculate_profit(self):
-        adjusted_cost = self.calculate_adjusted_cost()
-        return round(self.product.sale_price - adjusted_cost, 2)
-
-    def calculate_margin(self):
-        profit = self.calculate_profit()
-        return round((profit / self.product.sale_price) * 100, 2)
+        return f"{self.product.product_type} Variation ({'main' if self.main_variation else 'secondary'})"

@@ -1,6 +1,6 @@
 {% block content %}
 <div class="card !p-8">
-  <form hx-post="{{ request.path }}" class="modal-content px-4">
+  <form hx-post="{{ request.path }}" class="modal-content px-4" method="post" id="dialog">
     {% csrf_token %}
     <div class="modal-header">
       <h5 class="modal-title">Add Ingredients</h5>
@@ -31,10 +31,11 @@
   </form>
 </div>
 <script>
-  htmx.defineExtension('submit-form', (event) => {
-    event.on('htmx:afterRequest', (xhr) => {
-      if (xhr.status === 204) {
-        const modal = new bootstrap.Modal(document.getElementById("modal"));
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('recipeForm');
+    htmx.on('htmx:afterRequest', function(event) {
+      const modal = new bootstrap.Modal(document.getElementById('dialog'));
+      if (event.detail.xhr.status === 204 || event.detail.xhr.status === 200) {
         modal.hide();
       }
     });

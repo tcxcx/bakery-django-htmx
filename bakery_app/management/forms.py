@@ -27,12 +27,29 @@ class IngredientForm(forms.ModelForm):
 class RecipeForm(forms.ModelForm):
     class Meta:
         model = Recipe
-        fields = ['name', 'description', 'shape']
+        fields = ['name', 'description', 'shape', 'diameter', 'length', 'width']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'description': forms.Textarea(attrs={'class': 'form-control'}),
             'shape': forms.Select(attrs={'class': 'form-control'}),
+            'diameter': forms.NumberInput(attrs={'class': 'form-control'}),
+            'length': forms.NumberInput(attrs={'class': 'form-control'}),
+            'width': forms.NumberInput(attrs={'class': 'form-control'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super(RecipeForm, self).__init__(*args, **kwargs)
+        # Initial visibility of the dimension fields based on 'shape' selection
+        self.fields['diameter'].required = False
+        self.fields['length'].required = False
+        self.fields['width'].required = False
+
+        # Dynamically adjust required fields based on 'shape' field
+        if self.data.get('shape') == 'C':
+            self.fields['diameter'].required = True
+        elif self.data.get('shape') == 'R':
+            self.fields['length'].required = True
+            self.fields['width'].required = True
 
 class RecipeIngredientForm(forms.ModelForm):
     ingredient = ModelChoiceField(queryset=Ingredient.objects.all(), widget=forms.Select(attrs={'class': 'form-control'}))

@@ -27,9 +27,11 @@ class ProductVariationTable(tables.Table):
     product_type = tables.Column(accessor='product.product_type')
     shape = tables.Column(accessor='product.recipe.shape')
     dimensions = tables.TemplateColumn(template_name='management/suppliers/variations_dimensions_column.html')
+    adjusted_cost = tables.Column(accessor='calculate_adjusted_cost', verbose_name='Adjusted Cost')
+    profit = tables.Column(accessor='calculate_profit', verbose_name='Profit')
+    margin_percentage = tables.Column(accessor='calculate_margin', verbose_name='Margin (%)')
 
     class Meta:
         model = ProductVariation
-        fields = ['product_type', 'shape', 'dimensions']
+        fields = ['product_type', 'shape', 'dimensions', 'adjusted_cost', 'profit', 'margin_percentage']
         template_name = 'django_tables2/bootstrap4.html'
-
